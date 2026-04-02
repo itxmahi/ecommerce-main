@@ -1,5 +1,5 @@
 import { getProducts } from '@/lib/data';
-import { ProductCard, HeroSection, CustomOrder } from '@/components';
+import { ProductCard, HeroSection, CustomOrder, Testimonials } from '@/components';
 import { Search, Filter, ShoppingBag } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -82,6 +82,10 @@ export default async function HomePage({
           </div>
         )}
       </section>
+      
+      {/* Social Proof & Testimonials */}
+      <Testimonials />
+
       {/* Custom Order Section */}
       <CustomOrder />
     </div>

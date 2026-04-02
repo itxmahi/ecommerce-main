@@ -1,35 +1,49 @@
+import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
 
-export async function POST(request: Request) {
+export const dynamic = 'force-dynamic';
+
+export async function POST(request: Request): Promise<NextResponse> {
+  console.log('[API] Upload request received');
+  
   try {
-    const formData = await request.formData();
-    const file = formData.get('file') as File;
-    
-    if (!file) {
-      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+    const { searchParams } = new URL(request.url);
+    const filename = searchParams.get('filename');
+
+    if (!filename) {
+      return NextResponse.json({ error: 'Filename is missing in query string' }, { status: 400 });
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const formData = await request.formData();
+    const file = formData.get('file') as File;
 
-    // Create unique filename safely
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const extension = file.name.split('.').pop() || 'jpeg';
-    const filename = `product-upload-${uniqueSuffix}.${extension}`;
-    
-    const uploadDir = path.join(process.cwd(), 'public/images');
-    const filepath = path.join(uploadDir, filename);
+    if (!file) {
+      console.error('[API] No file found in FormData');
+      return NextResponse.json({ error: 'Form data must contain a "file" field' }, { status: 400 });
+    }
 
-    // Ensure the directory exists
-    await fs.mkdir(uploadDir, { recursive: true });
-    
-    await fs.writeFile(filepath, buffer);
+    console.log(`[API] Processing upload: ${filename} (${file.size} bytes)`);
 
-    return NextResponse.json({ url: `/images/${filename}` });
-  } catch (error) {
-    console.error('Upload Error:', error);
-    return NextResponse.json({ error: 'Failed to upload image' }, { status: 500 });
+    // Ensure token is present
+    const token = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!token) {
+      console.error('[API] BLOB_READ_WRITE_TOKEN is not defined in environment variables');
+      return NextResponse.json({ error: 'Cloud storage token missing in server configuration' }, { status: 500 });
+    }
+
+    const blob = await put(filename, file, {
+      access: 'public',
+      token: token,
+    });
+
+    console.log(`[API] Success: ${blob.url}`);
+    return NextResponse.json({ url: blob.url });
+
+  } catch (error: any) {
+    console.error('[API] Critical Upload Error:', error.message);
+    return NextResponse.json({ 
+      error: 'Vercel Blob synchronization failed', 
+      details: error.message 
+    }, { status: 500 });
   }
 }

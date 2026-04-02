@@ -20,11 +20,14 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { items, total } = body;
+    const { items, total, customerName, customerPhone, customerAddress } = body;
 
     const order = await prisma.order.create({
       data: {
         total,
+        customerName,
+        customerPhone,
+        customerAddress,
         items: {
           create: items.map((item: any) => ({
             productId: item.id.toString(),

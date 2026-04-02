@@ -5,10 +5,16 @@ import {
   Plus, Trash2, Edit2, ShoppingBag, List, Package, 
   TrendingUp, Search, PlusCircle, X, Check, Settings, 
   ShieldCheck, BarChart3, LayoutDashboard, Database,
-  Eye, MonitorDot, History, ArrowUpRight, BadgeCheck
+  Eye, MonitorDot, History, ArrowUpRight, BadgeCheck, Loader2
 } from 'lucide-react';
 import Image from 'next/image';
 import Cropper from 'react-easy-crop';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 interface Product {
   id: string;
@@ -129,25 +135,77 @@ export default function AdminPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsUploadingHero(true); 
+    
     let finalImageUrl = formData.image || '/images/box-1.jpeg';
+    
     if (productImageSrc && productCroppedAreaPixels) {
       try {
+        console.log("[DEBUG] Starting product image cropping...");
         const croppedBlob = await getCroppedImg(productImageSrc, productCroppedAreaPixels);
-        const file = new File([croppedBlob], "product-cropped.jpg", { type: "image/jpeg" });
+        const fileName = `product-${Date.now()}.jpg`;
+        const file = new File([croppedBlob], fileName, { type: "image/jpeg" });
+        
+        console.log("[DEBUG] Transmitting File:", fileName, "Size:", (file.size / 1024).toFixed(2), "KB");
+        
         const uploadData = new FormData();
         uploadData.append('file', file);
-        const uploadRes = await fetch('/api/upload', { method: 'POST', body: uploadData });
-        if (uploadRes.ok) {
-          const { url } = await uploadRes.json();
-          finalImageUrl = url;
+        
+        const uploadRes = await fetch(`/api/upload?filename=${encodeURIComponent(fileName)}`, { 
+          method: 'POST', 
+          body: uploadData 
+        });
+        
+        const responseText = await uploadRes.text();
+        console.log("[DEBUG] Server Raw Response:", responseText);
+        
+        let result;
+        try {
+          result = JSON.parse(responseText);
+        } catch (pErr) {
+          throw new Error("Server returned an invalid response (non-JSON). Check server logs.");
         }
-      } catch (err) { console.error(err); }
+        
+        if (uploadRes.ok) {
+          finalImageUrl = result.url;
+          console.log("[DEBUG] Vercel Blob Sync Success:", finalImageUrl);
+        } else {
+          throw new Error(result.error || result.details || 'Vercel rejected file ingest.');
+        }
+      } catch (err: any) { 
+        console.error("[DEBUG] Image Transmission Failure:", err);
+        alert(`System Failure: ${err.message}. Please restart your server and verify your internet connection.`);
+        setIsUploadingHero(false);
+        return;
+      }
     }
-    const payload = { ...formData, image: finalImageUrl };
-    const endpoint = editingProduct ? `/api/products/${editingProduct.id}` : '/api/products';
-    const method = editingProduct ? 'PUT' : 'POST';
-    const res = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    if (res.ok) { setIsModalOpen(false); fetchProducts(); }
+    
+    try {
+      console.log("[DEBUG] Archive finalization: saving product data...");
+      const payload = { ...formData, image: finalImageUrl };
+      const endpoint = editingProduct ? `/api/products/${editingProduct.id}` : '/api/products';
+      const method = editingProduct ? 'PUT' : 'POST';
+      
+      const res = await fetch(endpoint, { 
+        method, 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify(payload) 
+      });
+      
+      if (res.ok) { 
+        console.log("[DEBUG] Product archived successfully.");
+        setIsModalOpen(false); 
+        fetchProducts(); 
+      } else {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Database could not finalize the entry.');
+      }
+    } catch (err: any) {
+      console.error("[DEBUG] Finalization Error:", err);
+      alert(`Archive Error: ${err.message}`);
+    } finally {
+      setIsUploadingHero(false);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -175,24 +233,54 @@ export default function AdminPage() {
     if (!heroImageSrc || !croppedAreaPixels) return;
     setIsUploadingHero(true);
     try {
+      console.log("[DEBUG] Syncing hero cinematic backdrop...");
       const croppedBlob = await getCroppedImg(heroImageSrc, croppedAreaPixels);
-      const file = new File([croppedBlob], "hero-cropped.jpg", { type: "image/jpeg" });
+      const fileName = `hero-${Date.now()}.jpg`;
+      const file = new File([croppedBlob], fileName, { type: "image/jpeg" });
+      
       const uploadData = new FormData();
       uploadData.append('file', file);
-      const uploadRes = await fetch('/api/upload', { method: 'POST', body: uploadData });
+      
+      const uploadRes = await fetch(`/api/upload?filename=${encodeURIComponent(fileName)}`, { 
+        method: 'POST', 
+        body: uploadData 
+      });
+      
+      const responseText = await uploadRes.text();
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (pErr) {
+        throw new Error("Server communication fault (non-JSON response).");
+      }
+      
       if (uploadRes.ok) {
-        const { url } = await uploadRes.json();
-        await fetch('/api/settings', {
+        const { url } = result;
+        console.log("[DEBUG] Backdrop synced to cloud:", url);
+        const settingsRes = await fetch('/api/settings', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ key: 'heroImage', value: url })
         });
-        alert('Store backdrop synchronized successfully.');
-        setHeroImageSrc(null);
+        
+        if (settingsRes.ok) {
+          console.log("[DEBUG] Global env settings synced.");
+          alert('Store backdrop synchronized successfully.');
+          setHeroImageSrc(null);
+        } else {
+          const errData = await settingsRes.json();
+          throw new Error(errData.message || 'Environmental update failed.');
+        }
+      } else {
+        throw new Error(result.error || result.details || 'Ingestion failed.');
       }
 
-    } catch (e) { console.error(e); }
-    setIsUploadingHero(false);
+    } catch (e: any) { 
+      console.error("[DEBUG] Backdrop Synchronization Error:", e);
+      alert(`Backdrop Sync Failure: ${e.message}`);
+    } finally {
+      setIsUploadingHero(false);
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -341,9 +429,10 @@ export default function AdminPage() {
                              <p className="text-[9px] font-black text-gray-400 tracking-[0.3em] uppercase">STOCK LEVEL</p>
                              <div className="flex items-center gap-3">
                                 <div className="h-1.5 w-16 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
-                                   <div className={`h-full bg-indigo-600 rounded-full`} style={{ width: `${Math.min(product.stock * 5, 100)}%` }} />
+                                   <div className={cn("h-full rounded-full", product.stock <= 0 ? "bg-red-500" : "bg-indigo-600")} style={{ width: `${Math.min(Math.max(product.stock, 0) * 5, 100)}%` }} />
                                 </div>
-                                <span className="font-black text-xl text-indigo-600">{product.stock}</span>
+                                <span className={cn("font-black text-xl", product.stock <= 0 ? "text-red-500" : "text-indigo-600")}>{product.stock}</span>
+                                {product.stock <= 0 && <span className="text-[8px] font-black bg-red-500/10 text-red-500 px-2 py-0.5 rounded-full tracking-tighter">OUT OF STOCK</span>}
                              </div>
                           </div>
                           <div className="flex items-center gap-4">
@@ -372,12 +461,30 @@ export default function AdminPage() {
                    <div key={order.id} className="bg-white dark:bg-[#0a0a0a] p-16 rounded-[5rem] shadow-2xl border border-gray-100 dark:border-white/5 hover:-translate-y-2 transition-transform duration-700">
                       <div className="flex flex-col lg:flex-row items-start justify-between mb-16 pb-12 border-b border-gray-50 dark:border-white/5 gap-10">
                          <div className="space-y-6">
-                            <span className="px-6 py-2 rounded-full bg-indigo-500/10 text-[9px] font-black text-indigo-500 tracking-[0.4em] uppercase">{new Date(order.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                            <h3 className="text-5xl font-black text-gray-900 dark:text-white tracking-tight uppercase">ORDER #{order.id.slice(-6)}</h3>
+                            <div className="flex flex-col gap-2">
+                               <span className="w-fit px-6 py-2 rounded-full bg-indigo-500/10 text-[9px] font-black text-indigo-500 tracking-[0.4em] uppercase">{new Date(order.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                               <h3 className="text-5xl font-black text-gray-900 dark:text-white tracking-tight uppercase leading-none">ORDER #{order.id.slice(-6).toUpperCase()}</h3>
+                            </div>
+                            
+                            {/* NEW: Customer Identity Block */}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 pt-4">
+                               <div className="space-y-2">
+                                  <p className="text-[9px] font-black text-gray-400 tracking-[0.3em] uppercase">CUSTOMER IDENT</p>
+                                  <p className="text-xl font-black text-indigo-600 uppercase">{order.customerName || 'ANONYMOUS'}</p>
+                               </div>
+                               <div className="space-y-2">
+                                  <p className="text-[9px] font-black text-gray-400 tracking-[0.3em] uppercase">CONTACT</p>
+                                  <p className="text-xl font-black text-gray-900 dark:text-white">{order.customerPhone || 'N/A'}</p>
+                                </div>
+                                <div className="space-y-2">
+                                  <p className="text-[9px] font-black text-gray-400 tracking-[0.3em] uppercase">DELIVERY AXIS</p>
+                                  <p className="text-sm font-bold text-gray-600 dark:text-gray-400 leading-tight uppercase line-clamp-2">{order.customerAddress || 'LOCAL PICKUP'}</p>
+                                </div>
+                            </div>
                          </div>
                          <div className="flex flex-wrap items-center gap-12">
                            <div className="text-right">
-                              <p className="text-[10px] font-black text-gray-400 tracking-[0.3em] uppercase mb-3">TOTAL AMOUNT</p>
+                              <p className="text-[10px] font-black text-gray-400 tracking-[0.3em] uppercase mb-3 text-ellipsis">TOTAL AMOUNT</p>
                               <p className="text-6xl font-black text-gray-900 dark:text-white font-serif italic leading-none">Rs. {order.total.toLocaleString()}</p>
                            </div>
                            <button onClick={() => handleDeleteOrder(order.id)} className="p-8 bg-gray-50 dark:bg-white/5 text-gray-400 hover:text-white hover:bg-red-600 rounded-[2.5rem] border border-gray-100 dark:border-white/5 transition-all shadow-xl">
@@ -448,8 +555,17 @@ export default function AdminPage() {
                                   <input type="range" value={zoom} min={1} max={3} step={0.1} onChange={(e) => setZoom(parseFloat(e.target.value))} className="w-full h-1 bg-gray-200 dark:bg-white/10 rounded-full appearance-none accent-indigo-600" />
                                </div>
                                <div className="flex gap-6 w-full lg:w-auto">
-                                  <button onClick={() => setHeroImageSrc(null)} className="px-12 py-6 rounded-[2.5rem] font-black text-[11px] tracking-[0.3em] uppercase text-gray-400 hover:text-red-500 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 transition-all shadow-xl">CANCEL</button>
-                                  <button onClick={handleHeroUpdate} className="flex-grow lg:flex-grow-0 bg-indigo-600 text-white px-20 py-6 rounded-[2.5rem] text-[11px] font-black tracking-[0.4em] uppercase shadow-[0_25px_50px_rgba(79,70,229,0.3)] active:scale-95 transition-all">COMMIT CHANGE</button>
+                                  <button onClick={() => setHeroImageSrc(null)} disabled={isUploadingHero} className="px-12 py-6 rounded-[2.5rem] font-black text-[11px] tracking-[0.3em] uppercase text-gray-400 hover:text-red-500 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 transition-all shadow-xl">CANCEL</button>
+                                  <button onClick={handleHeroUpdate} disabled={isUploadingHero} className="flex-grow lg:flex-grow-0 bg-indigo-600 text-white px-20 py-6 rounded-[2.5rem] text-[11px] font-black tracking-[0.4em] uppercase shadow-[0_25px_50px_rgba(79,70,229,0.3)] active:scale-95 transition-all flex items-center justify-center gap-3">
+                                    {isUploadingHero ? (
+                                      <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        SYNCING...
+                                      </>
+                                    ) : (
+                                      'COMMIT CHANGE'
+                                    )}
+                                  </button>
                                </div>
                             </div>
                          </div>
@@ -533,13 +649,34 @@ export default function AdminPage() {
                               <textarea required value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} rows={5} className="w-full px-10 py-6 rounded-[2rem] bg-gray-50 dark:bg-white/[0.04] border border-gray-100 dark:border-white/5 focus:border-indigo-500 outline-none font-medium text-lg leading-relaxed text-gray-500 transition-all resize-none shadow-lg" />
                            </div>
                            <div className="space-y-4">
-                              <label className="text-[11px] font-black text-gray-400 tracking-[0.4em] uppercase ml-4">STOCK QUANTITY</label>
+                              <div className="flex items-center justify-between ml-4">
+                                 <label className="text-[11px] font-black text-gray-400 tracking-[0.4em] uppercase">STOCK QUANTITY</label>
+                                 <button 
+                                   type="button"
+                                   onClick={() => setFormData({...formData, stock: formData.stock > 0 ? 0 : 10})}
+                                   className={cn(
+                                      "text-[9px] font-black px-4 py-2 rounded-full transition-all",
+                                      formData.stock <= 0 ? "bg-green-500 text-white" : "bg-red-500/10 text-red-500"
+                                   )}
+                                 >
+                                    {formData.stock <= 0 ? "RESTOCK ITEM" : "MARK OUT OF STOCK"}
+                                 </button>
+                              </div>
                               <input required type="number" value={formData.stock || ''} onChange={(e) => setFormData({...formData, stock: parseInt(e.target.value)})} className="w-full px-10 py-6 rounded-[2rem] bg-gray-50 dark:bg-white/[0.04] border border-gray-100 dark:border-white/5 focus:border-indigo-500 outline-none font-black text-gray-900 dark:text-white text-2xl shadow-lg" />
                            </div>
                         </div>
                         <div className="pt-10">
-                           <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-8 rounded-[2.5rem] text-[12px] font-black tracking-[0.5em] uppercase shadow-[0_25px_50px_rgba(79,70,229,0.3)] transition-all active:scale-95 flex items-center justify-center gap-6">
-                              {editingProduct ? 'UPDATE PRODUCT' : 'SAVE PRODUCT'} <Check className="w-6 h-6" strokeWidth={3} />
+                           <button type="submit" disabled={isUploadingHero} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-8 rounded-[2.5rem] text-[12px] font-black tracking-[0.5em] uppercase shadow-[0_25px_50px_rgba(79,70,229,0.3)] transition-all active:scale-95 flex items-center justify-center gap-6">
+                              {isUploadingHero ? (
+                                <>
+                                  <Loader2 className="w-6 h-6 animate-spin" />
+                                  SYNCING ARCHIVE...
+                                </>
+                              ) : (
+                                <>
+                                  {editingProduct ? 'UPDATE PRODUCT' : 'SAVE PRODUCT'} <Check className="w-6 h-6" strokeWidth={3} />
+                                </>
+                              )}
                            </button>
                         </div>
                      </form>

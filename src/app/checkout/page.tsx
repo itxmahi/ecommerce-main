@@ -8,6 +8,12 @@ import { ShieldCheck, Truck, Lock, CreditCard, ArrowRight } from 'lucide-react';
 export default function CheckoutPage() {
   const { cart, getCartTotal, clearCart } = useCart();
   const router = useRouter();
+  const [shippingData, setShippingData] = useState({
+    name: '',
+    phone: '',
+    address: '',
+    city: 'Islamabad'
+  });
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -15,19 +21,38 @@ export default function CheckoutPage() {
     setIsProcessing(true);
     
     try {
+      // 1. Save to Database
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: cart,
           total: getCartTotal(),
+          customerName: shippingData.name,
+          customerPhone: shippingData.phone,
+          customerAddress: `${shippingData.address}, ${shippingData.city}`
         })
       });
 
       if (!res.ok) throw new Error('Failed to save order');
       const order = await res.json();
       
+      // 2. Prepare WhatsApp Message
+      const message = `*NEW ORDER - AL-JAMAAL ART*%0A%0A` +
+        `*Order ID:* ${order.id.slice(-6).toUpperCase()}%0A` +
+        `*Customer:* ${shippingData.name}%0A` +
+        `*Phone:* ${shippingData.phone}%0A` +
+        `*Address:* ${shippingData.address}, ${shippingData.city}%0A%0A` +
+        `*ITEMS:*%0A` +
+        cart.map(item => `- ${item.title} (x${item.quantity}) - Rs. ${item.price.toLocaleString()}`).join('%0A') +
+        `%0A%0A*TOTAL AMOUNT:* Rs. ${getCartTotal().toLocaleString()}%0A%0A` +
+        `Please confirm my order. Thank you!`;
+
+      const whatsappUrl = `https://wa.me/923455096636?text=${message}`;
+
+      // 3. Finalize
       clearCart();
+      window.open(whatsappUrl, '_blank');
       router.push(`/checkout/success?id=${order.id}`);
     } catch (err) {
       console.error(err);
@@ -53,59 +78,77 @@ export default function CheckoutPage() {
         <div className="space-y-12">
           <form onSubmit={handleSubmit} className="space-y-12 animate-in fade-in slide-in-from-left-6">
             <div className="space-y-8 glass p-10 rounded-3xl border border-border">
-              <h3 className="text-3xl font-black flex items-center gap-4 tracking-tighter">
+              <h3 className="text-3xl font-black flex items-center gap-4 tracking-tighter uppercase">
                 <Truck className="w-8 h-8 text-indigo-600" /> SHIPPING DETAILS
               </h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-black tracking-widest text-muted uppercase">Full Name</label>
-                  <input required type="text" placeholder="John Doe" className="w-full px-6 py-4 rounded-2xl bg-secondary/50 border border-border focus:ring-2 focus:ring-indigo-600 text-foreground outline-none transition-all" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black tracking-[0.4em] text-muted uppercase ml-4">Full Name</label>
+                  <input 
+                    required 
+                    type="text" 
+                    value={shippingData.name}
+                    onChange={(e) => setShippingData({...shippingData, name: e.target.value})}
+                    placeholder="Enter your name" 
+                    className="w-full px-8 py-5 rounded-2xl bg-secondary/50 border border-border focus:ring-2 focus:ring-indigo-600 text-lg font-bold text-foreground outline-none transition-all shadow-lg" 
+                  />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-black tracking-widest text-muted uppercase">Email Address</label>
-                  <input required type="email" placeholder="john@example.com" className="w-full px-6 py-4 rounded-2xl bg-secondary/50 border border-border focus:ring-2 focus:ring-indigo-600 text-foreground outline-none transition-all" />
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black tracking-[0.4em] text-muted uppercase ml-4">WhatsApp Number</label>
+                  <input 
+                    required 
+                    type="tel" 
+                    value={shippingData.phone}
+                    onChange={(e) => setShippingData({...shippingData, phone: e.target.value})}
+                    placeholder="+92..." 
+                    className="w-full px-8 py-5 rounded-2xl bg-secondary/50 border border-border focus:ring-2 focus:ring-indigo-600 text-lg font-bold text-foreground outline-none transition-all shadow-lg" 
+                  />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-black tracking-widest text-muted uppercase">Shipping Address</label>
-                <input required type="text" placeholder="123 Luxury Lane" className="w-full px-6 py-4 rounded-2xl bg-secondary/50 border border-border focus:ring-2 focus:ring-indigo-600 text-foreground outline-none transition-all" />
+              <div className="space-y-4">
+                <label className="text-[10px] font-black tracking-[0.4em] text-muted uppercase ml-4">Delivery Address</label>
+                <input 
+                  required 
+                  type="text" 
+                  value={shippingData.address}
+                  onChange={(e) => setShippingData({...shippingData, address: e.target.value})}
+                  placeholder="House #, Street, Area" 
+                  className="w-full px-8 py-5 rounded-2xl bg-secondary/50 border border-border focus:ring-2 focus:ring-indigo-600 text-lg font-bold text-foreground outline-none transition-all shadow-lg" 
+                />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                 <div className="space-y-2">
-                  <label className="text-sm font-black tracking-widest text-muted uppercase">City</label>
-                  <input required type="text" placeholder="New York" className="w-full px-6 py-4 rounded-2xl bg-secondary/50 border border-border focus:ring-2 focus:ring-indigo-600 text-foreground outline-none transition-all" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-black tracking-widest text-muted uppercase">Postcode</label>
-                  <input required type="text" placeholder="10001" className="w-full px-6 py-4 rounded-2xl bg-secondary/50 border border-border focus:ring-2 focus:ring-indigo-600 text-foreground outline-none transition-all" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-black tracking-widest text-muted uppercase">Phone</label>
-                  <input required type="tel" placeholder="+1..." className="w-full px-6 py-4 rounded-2xl bg-secondary/50 border border-border focus:ring-2 focus:ring-indigo-600 text-foreground outline-none transition-all" />
-                </div>
+              <div className="space-y-4">
+                <label className="text-[10px] font-black tracking-[0.4em] text-muted uppercase ml-4">City</label>
+                <input 
+                  required 
+                  type="text" 
+                  value={shippingData.city}
+                  onChange={(e) => setShippingData({...shippingData, city: e.target.value})}
+                  placeholder="e.g. Islamabad" 
+                  className="w-full px-8 py-5 rounded-2xl bg-secondary/50 border border-border focus:ring-2 focus:ring-indigo-600 text-lg font-bold text-foreground outline-none transition-all shadow-lg" 
+                />
               </div>
             </div>
 
             <div className="space-y-8 glass p-10 rounded-3xl border border-border opacity-50 pointer-events-none grayscale">
-              <h3 className="text-3xl font-black flex items-center gap-4 tracking-tighter">
-                <CreditCard className="w-8 h-8 text-indigo-600" /> PAYMENT (MOCK)
+              <h3 className="text-3xl font-black flex items-center gap-4 tracking-tighter uppercase">
+                <CreditCard className="w-8 h-8 text-indigo-600" /> PAYMENT METHOD
               </h3>
-              <p className="text-sm font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-xl border border-indigo-100 flex items-center gap-3">
-                <Lock className="w-5 h-5" /> This is a simulation. No real payment is required.
+              <p className="text-sm font-black text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 p-6 rounded-2xl border border-indigo-100 flex items-center gap-4">
+                <Lock className="w-6 h-6" /> CASH ON DELIVERY (SECURE)
               </p>
             </div>
 
             <button
               type="submit"
               disabled={isProcessing}
-              className={`btn-primary w-full py-8 text-xl font-black tracking-widest flex items-center justify-center gap-4 shadow-indigo-600/40 ${
+              className={`btn-primary w-full py-10 text-2xl font-black tracking-[0.3em] flex items-center justify-center gap-6 shadow-[0_20px_50px_rgba(79,70,229,0.3)] hover:scale-[1.02] active:scale-95 duration-500 rounded-[2.5rem] uppercase ${
                 isProcessing ? 'animate-pulse' : ''
               }`}
             >
-              {isProcessing ? 'PROCESSING ORDER...' : 'PLACE ORDER NOW'} <ArrowRight className="w-6 h-6" />
+              {isProcessing ? 'PROCESSING...' : 'PLACE ORDER NOW'} <ArrowRight className="w-8 h-8" />
             </button>
           </form>
         </div>

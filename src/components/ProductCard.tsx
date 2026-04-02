@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart, CartItem } from '@/context/CartContext';
-import { Heart, ShoppingBag, Maximize2, X } from 'lucide-react';
+import { Heart, ShoppingBag, Maximize2, X, Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -18,6 +18,7 @@ interface Product {
   price: number;
   image: string;
   category: string;
+  stock: number;
 }
 
 export default function ProductCard({ product }: { product: Product }) {
@@ -25,6 +26,7 @@ export default function ProductCard({ product }: { product: Product }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const isWishlisted = wishlist.includes(product.id);
+  const isOutOfStock = product.stock <= 0;
 
   // Prevent scroll when preview is open
   useEffect(() => {
@@ -38,11 +40,21 @@ export default function ProductCard({ product }: { product: Product }) {
 
   return (
     <div
-      className="group relative bg-card-bg rounded-2xl border border-border overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2"
+      className={cn(
+        "group relative bg-card-bg rounded-2xl border border-border overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2",
+        isOutOfStock && "opacity-75 grayscale-[0.5]"
+      )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       suppressHydrationWarning
     >
+      {/* Out of Stock Ribbon */}
+      {isOutOfStock && (
+        <div className="absolute top-6 -left-12 -rotate-45 bg-red-600 text-white px-12 py-1.5 text-[8px] font-black tracking-[0.2em] uppercase z-[45] shadow-2xl border-y border-red-500/20 shadow-red-600/30">
+           OUT OF STOCK
+        </div>
+      )}
+
       {/* Image Container */}
       <div className="relative aspect-[4/5] overflow-hidden bg-white/5" suppressHydrationWarning>
         <Image
@@ -51,7 +63,7 @@ export default function ProductCard({ product }: { product: Product }) {
           fill
           className={cn(
             "object-cover transition-transform duration-1000 ease-out",
-            isHovered ? "scale-110" : "scale-100"
+            isHovered && !isOutOfStock ? "scale-110" : "scale-100"
           )}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
@@ -95,6 +107,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
         <div className={cn(
           "absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-20 transition-all duration-500 translate-y-full group-hover:translate-y-0",
+          isOutOfStock && "hidden"
         )} suppressHydrationWarning>
           <button
             onClick={(e) => {
@@ -110,7 +123,21 @@ export default function ProductCard({ product }: { product: Product }) {
 
       {/* Info Section */}
       <div className="p-5 py-6 space-y-3" suppressHydrationWarning>
-        <span className="text-[8px] font-black tracking-[0.4em] text-indigo-500 uppercase">Masterpiece Collection</span>
+        <div className="flex items-center justify-between">
+            <span className="text-[8px] font-black tracking-[0.4em] text-indigo-500 uppercase">Masterpiece Collection</span>
+            {isOutOfStock ? (
+              <span className="text-[9px] font-black text-red-500 uppercase flex items-center gap-1.5"><X className="w-3 h-3" /> ARCHIVED</span>
+            ) : product.stock > 0 && product.stock < 5 ? (
+              <span className="text-[9px] font-black text-red-600 animate-pulse uppercase tracking-wider flex items-center gap-1.5 bg-red-50 px-2 py-0.5 rounded-full border border-red-100">
+                ONLY {product.stock} LEFT!
+              </span>
+            ) : (
+              <div className="flex items-center gap-1">
+                 {[...Array(5)].map((_, i) => <Star key={i} className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400" />)}
+                 <span className="text-[8px] font-black text-gray-400 ml-1">(5.0)</span>
+              </div>
+            )}
+        </div>
         <h3 className="text-xl font-black text-foreground tracking-tight line-clamp-1">
           {product.title}
         </h3>
