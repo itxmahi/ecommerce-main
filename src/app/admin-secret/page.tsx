@@ -64,9 +64,15 @@ export default function AdminPage() {
     try {
       const res = await fetch('/api/orders');
       const data = await res.json();
-      setOrders(data);
+      if (Array.isArray(data)) {
+        setOrders(data);
+      } else {
+        console.error("Orders API did not return an array:", data);
+        setOrders([]);
+      }
     } catch (e) {
       console.error("Orders fetch failed", e);
+      setOrders([]);
     }
   };
 
@@ -75,9 +81,15 @@ export default function AdminPage() {
     try {
       const res = await fetch('/api/products');
       const data = await res.json();
-      setProducts(data);
+      if (Array.isArray(data)) {
+        setProducts(data);
+      } else {
+        console.error("Products API did not return an array:", data);
+        setProducts([]);
+      }
     } catch (e) {
       console.error("Fetch failed", e);
+      setProducts([]);
     }
   };
 
@@ -457,7 +469,7 @@ export default function AdminPage() {
                </div>
              ) : (
                <div className="grid grid-cols-1 gap-12">
-                 {orders.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((order: any) => (
+                 {[...orders].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((order: any) => (
                    <div key={order.id} className="bg-white dark:bg-[#0a0a0a] p-16 rounded-[5rem] shadow-2xl border border-gray-100 dark:border-white/5 hover:-translate-y-2 transition-transform duration-700">
                       <div className="flex flex-col lg:flex-row items-start justify-between mb-16 pb-12 border-b border-gray-50 dark:border-white/5 gap-10">
                          <div className="space-y-6">
