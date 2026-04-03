@@ -44,8 +44,11 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(order, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Order creation error:', error);
-    return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Database error while creating order', 
+      details: error.message || error.toString() 
+    }, { status: 500 });
   }
 }

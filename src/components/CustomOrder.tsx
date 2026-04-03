@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import { Paintbrush, Sparkles, PencilLine, PenTool, Check, ShoppingBag, Search } from 'lucide-react';
+import Image from 'next/image';
 
 const CUSTOM_CATEGORIES = [
   {
@@ -138,26 +139,27 @@ export default function CustomOrder() {
         <div className="bg-indigo-50/50 dark:bg-indigo-500/5 backdrop-blur-3xl border border-indigo-500/20 p-12 md:p-16 rounded-[4rem] flex flex-col md:flex-row items-center justify-between gap-12 animate-in slide-in-from-bottom-10 duration-1000">
           <div className="flex items-center gap-10">
              <div className="relative w-32 h-32 md:w-48 md:h-48 rounded-[2.5rem] overflow-hidden ring-4 ring-white dark:ring-white/10 shadow-2xl bg-white">
-                <img 
+                <Image 
                   src={selectedCategory?.image || '/placeholder.svg'} 
-                  alt={selectedCategory?.title} 
+                  alt={selectedCategory?.title || "Custom Order"} 
+                  fill
                   className="w-full h-full object-cover" 
                 />
              </div>
-             <div className="space-y-4">
-                <h4 className="text-3xl md:text-5xl font-black tracking-tight text-gray-900 dark:text-white uppercase leading-none">
-                   Confirm <span className="text-indigo-600 italic font-serif lowercase tracking-normal">Selection</span>
-                </h4>
-                <p className="text-gray-500 font-bold tracking-widest text-[10px] uppercase">
-                   Your Choice: {selectedCategory?.title} | Quality Inspection Included
-                </p>
-             </div>
+              <div className="space-y-4 text-center md:text-left">
+                 <h4 className="text-2xl md:text-5xl font-black tracking-tight text-gray-900 dark:text-white uppercase leading-none">
+                    Confirm <span className="text-indigo-600 italic font-serif lowercase tracking-normal">Selection</span>
+                 </h4>
+                 <p className="text-gray-500 font-bold tracking-widest text-[8px] md:text-[10px] uppercase">
+                    Your Choice: {selectedCategory?.title}
+                 </p>
+              </div>
           </div>
 
           <button
             onClick={handleAddToCart}
             disabled={isSuccess}
-            className={`group relative overflow-hidden flex items-center justify-center gap-6 px-16 py-8 rounded-[2.5rem] text-[11px] font-black tracking-[0.4em] uppercase transition-all duration-700 shadow-2xl active:scale-95 ${
+            className={`group relative overflow-hidden flex items-center justify-center gap-4 md:gap-6 px-10 md:px-16 py-6 md:py-8 rounded-[2rem] md:rounded-[2.5rem] text-[9px] md:text-[11px] font-black tracking-[0.2em] md:tracking-[0.4em] uppercase transition-all duration-700 shadow-2xl active:scale-95 ${
               isSuccess 
               ? 'bg-green-500 text-white shadow-green-500/30' 
               : 'bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-indigo-600 dark:hover:bg-indigo-600 hover:text-white'

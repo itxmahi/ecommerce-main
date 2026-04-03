@@ -7,7 +7,7 @@ const testimonials = [
     name: "Ahmed Khan",
     location: "Islamabad",
     rating: 5,
-    text: "Al-Jamaal Art brings a whole new level of elegance to Islamic calligraphy. I bought the Surah Al-Fatiha canvas for my living room, and it's a masterpiece that everyone admires. Highly recommended!",
+    text: "RUHQALAM brings a whole new level of elegance to Islamic calligraphy. I bought the Surah Al-Fatiha canvas for my living room, and it's a masterpiece that everyone admires. Highly recommended!",
     image: "/images/testimonial-1.jpg", // We can use placeholders or specific images
     verified: true
   },

@@ -10,91 +10,100 @@
   --color-accent: var(--accent);
   --color-card-bg: var(--card-bg);
   --color-border: var(--border);
+  --color-gold: #d4af37;
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #111827;
-  --primary: #4f46e5;
-  /* Indigo 600 */
+  --background: #fdfbf7; /* Soft Ivory */
+  --foreground: #1a1a1a;
+  --primary: #111111;
   --primary-foreground: #ffffff;
-  --secondary: #f3f4f6;
-  --muted: #6b7280;
-  --accent: #f59e0b;
-  /* Amber 500 */
+  --secondary: #f3f2ef;
+  --muted: #888888;
+  --accent: #d4af37; /* Classic Gold */
   --card-bg: #ffffff;
-  --border: #e5e7eb;
+  --border: #e8e8e8;
 }
 
 .dark {
-  --background: #030712;
-  --foreground: #f9fafb;
-  --primary: #6366f1;
-  /* Indigo 500 */
-  --primary-foreground: #ffffff;
-  --secondary: #1f2937;
-  --muted: #9ca3af;
-  --accent: #fbbf24;
-  --card-bg: #111827;
-  --border: #374151;
+  --background: #050505; /* Blackest Black */
+  --foreground: #f0f0f0;
+  --primary: #ffffff;
+  --primary-foreground: #000000;
+  --secondary: #111111;
+  --muted: #666666;
+  --accent: #d4af37;
+  --card-bg: #0a0a0a;
+  --border: #1a1a1a;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 @layer components {
   .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    @apply px-6 py-2 bg-primary text-primary-foreground font-semibold rounded-lg shadow-md hover:bg-primary/90 transition-all duration-300 transform hover:scale-105 active:scale-95;
+    @apply inline-flex items-center justify-center px-10 py-4 bg-primary text-primary-foreground font-black text-[11px] tracking-[0.3em] uppercase rounded-full shadow-2xl hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)] transition-all duration-500 transform hover:-translate-y-1 active:scale-95;
   }
 
   .btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    @apply px-6 py-2 bg-secondary text-foreground font-semibold rounded-lg border border-border hover:bg-secondary/80 transition-all duration-200 transform hover:scale-105 active:scale-95;
+    @apply inline-flex items-center justify-center px-10 py-4 bg-secondary text-foreground font-black text-[11px] tracking-[0.3em] uppercase rounded-full border border-border hover:border-gold/50 transition-all duration-500 transform hover:-translate-y-1 active:scale-95;
   }
 
-  .card-hover {
-    cursor: pointer;
-    @apply hover:shadow-xl hover:-translate-y-1 transition-all duration-300;
+  .luxury-card {
+    @apply bg-card-bg rounded-[2.5rem] border border-border shadow-sm hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] hover:border-gold/20 transition-all duration-700 ease-out;
   }
 }
 
 /* Glassmorphism utility */
 .glass {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .dark .glass {
-  background: rgba(17, 24, 39, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* Luxury Animations */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  animation: fade-up 1s ease-out forwards;
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--background);
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 4px;
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--muted);
+  background: var(--accent);
+}
+
+/* Gold Text Utility */
+.text-gold {
+  background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

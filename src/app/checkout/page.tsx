@@ -34,17 +34,20 @@ export default function CheckoutPage() {
         })
       });
 
-      if (!res.ok) throw new Error('Failed to save order');
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.details || errData.error || 'Failed to save order');
+      }
       const order = await res.json();
       
-      // 2. Prepare WhatsApp Message
-      const message = `*NEW ORDER - AL-JAMAAL ART*%0A%0A` +
+      // 2. Prepare WhatsApp Message (Professional Format with Image Links)
+      const message = `*NEW ORDER - RUHQALAM*%0A%0A` +
         `*Order ID:* ${order.id.slice(-6).toUpperCase()}%0A` +
         `*Customer:* ${shippingData.name}%0A` +
         `*Phone:* ${shippingData.phone}%0A` +
         `*Address:* ${shippingData.address}, ${shippingData.city}%0A%0A` +
         `*ITEMS:*%0A` +
-        cart.map(item => `- ${item.title} (x${item.quantity}) - Rs. ${item.price.toLocaleString()}`).join('%0A') +
+        cart.map(item => `- ${item.title} (x${item.quantity}) - Rs. ${item.price.toLocaleString()}%0A  🔗 Image: ${item.image}`).join('%0A') +
         `%0A%0A*TOTAL AMOUNT:* Rs. ${getCartTotal().toLocaleString()}%0A%0A` +
         `Please confirm my order. Thank you!`;
 
@@ -52,11 +55,11 @@ export default function CheckoutPage() {
 
       // 3. Finalize
       clearCart();
-      window.open(whatsappUrl, '_blank');
-      router.push(`/checkout/success?id=${order.id}`);
-    } catch (err) {
+      // Redirecting directly to bypass browser's popup blocker after async call
+      window.location.href = whatsappUrl;
+    } catch (err: any) {
       console.error(err);
-      alert('Failed to place order. Please try again.');
+      alert(`Error placing order: ${err.message}`);
       setIsProcessing(false);
     }
   };

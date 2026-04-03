@@ -1,6 +1,10 @@
 import { getProducts } from '@/lib/data';
 import { ProductCard, HeroSection, CustomOrder, Testimonials } from '@/components';
 import { Search, Filter, ShoppingBag } from 'lucide-react';
+import { Cinzel } from 'next/font/google';
+import Link from 'next/link';
+
+const cinzel = Cinzel({ subsets: ["latin"] });
 
 export const dynamic = 'force-dynamic';
 
@@ -13,13 +17,13 @@ export default async function HomePage({
   const query = searchParams.q?.toLowerCase() || '';
   const categoryFilter = searchParams.category || '';
 
-  const filteredProducts = allProducts.filter((product) => {
+  const filteredProducts = allProducts.filter((product: any) => {
     const matchesQuery = product.title.toLowerCase().includes(query) || product.description.toLowerCase().includes(query);
     const matchesCategory = categoryFilter ? product.category === categoryFilter : true;
     return matchesQuery && matchesCategory;
   });
 
-  const categories = Array.from(new Set(allProducts.map((p) => p.category)));
+  const categories = Array.from(new Set(allProducts.map((p: any) => p.category))) as string[];
 
   return (
     <div className="max-w-7xl mx-auto px-6 space-y-12">
@@ -29,39 +33,39 @@ export default async function HomePage({
       {/* Filters and Search */}
       <section className="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b">
         <div className="flex flex-wrap items-center gap-3">
-          <a
+          <Link
             href="/"
-            className={`px-6 py-2 rounded-full text-sm font-bold border transition-all duration-300 ${
+            className={`px-8 py-3 rounded-full text-[10px] font-black tracking-[0.2em] uppercase border transition-all duration-700 ${
               !categoryFilter 
-              ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg' 
-              : 'bg-transparent text-muted hover:border-indigo-600 hover:text-indigo-600'
+              ? 'bg-gold text-white border-gold shadow-[0_15px_30px_rgba(212,175,55,0.3)]' 
+              : 'bg-transparent text-muted hover:border-gold hover:text-gold'
             }`}
           >
-            All Products
-          </a>
-          {categories.map((cat) => (
-            <a
+            ALL PRODUCTS
+          </Link>
+          {categories.map((cat: string) => (
+            <Link
               key={cat}
               href={`?category=${cat}`}
-              className={`px-6 py-2 rounded-full text-sm font-bold border transition-all duration-300 ${
+              className={`px-8 py-3 rounded-full text-[10px] font-black tracking-[0.2em] uppercase border transition-all duration-700 ${
                 categoryFilter === cat 
-                ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg' 
-                : 'bg-transparent text-muted hover:border-indigo-600 hover:text-indigo-600'
+                ? 'bg-gold text-white border-gold shadow-[0_15px_30px_rgba(212,175,55,0.3)]' 
+                : 'bg-transparent text-muted hover:border-gold hover:text-gold'
               }`}
             >
               {cat}
-            </a>
+            </Link>
           ))}
         </div>
 
-        <form action="/" className="relative w-full md:w-96 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted group-focus-within:text-indigo-600 transition-colors" />
+        <form action="/" className="relative w-full md:w-[450px] group animate-fade-up">
+          <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-muted group-focus-within:text-gold transition-colors" strokeWidth={1.5} />
           <input
             type="text"
             name="q"
             defaultValue={query}
-            placeholder="Search products..."
-            className="w-full pl-12 pr-4 py-3 rounded-2xl bg-secondary/50 border border-border focus:ring-2 focus:ring-indigo-600 transition-all text-sm outline-none"
+            placeholder="Search the collection..."
+            className={`${cinzel.className} w-full pl-16 pr-8 py-4 rounded-full bg-secondary/5 border border-border focus:ring-1 focus:ring-gold focus:border-gold transition-all text-[11px] font-bold tracking-widest uppercase outline-none placeholder:text-muted/40`}
           />
         </form>
       </section>
@@ -70,7 +74,7 @@ export default async function HomePage({
       <section id="products">
         {filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
-            {filteredProducts.map((product) => (
+            {filteredProducts.map((product: any) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>

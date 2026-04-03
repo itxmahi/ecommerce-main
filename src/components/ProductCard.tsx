@@ -7,6 +7,9 @@ import { Heart, ShoppingBag, Maximize2, X, Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { Cinzel } from 'next/font/google';
+
+const cinzel = Cinzel({ subsets: ["latin"] });
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -41,8 +44,8 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <div
       className={cn(
-        "group relative bg-card-bg rounded-2xl border border-border overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2",
-        isOutOfStock && "opacity-75 grayscale-[0.5]"
+        "group relative luxury-card overflow-hidden",
+        isOutOfStock && "opacity-75 grayscale-[0.8]"
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -106,15 +109,15 @@ export default function ProductCard({ product }: { product: Product }) {
         </div>
 
         <div className={cn(
-          "absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-20 transition-all duration-500 translate-y-full group-hover:translate-y-0",
-          isOutOfStock && "hidden"
+          "absolute bottom-0 left-0 right-0 p-3 md:p-6 bg-gradient-to-t from-black/95 via-black/50 to-transparent z-20 transition-all duration-500",
+          !isOutOfStock ? "translate-y-0 md:translate-y-full md:group-hover:translate-y-0" : "hidden"
         )} suppressHydrationWarning>
           <button
             onClick={(e) => {
               e.preventDefault();
               addToCart(product);
             }}
-            className="w-full bg-white text-black py-3 rounded-xl text-[10px] font-black tracking-[0.2em] uppercase transition-all duration-300 hover:bg-indigo-600 hover:text-white"
+            className="w-full bg-white text-black py-2.5 md:py-4 rounded-full text-[9px] md:text-[11px] font-black tracking-[0.1em] md:tracking-[0.3em] uppercase transition-all duration-500 hover:bg-gold hover:text-white shadow-2xl active:scale-95"
           >
             ADD TO COLLECTION
           </button>
@@ -124,28 +127,27 @@ export default function ProductCard({ product }: { product: Product }) {
       {/* Info Section */}
       <div className="p-5 py-6 space-y-3" suppressHydrationWarning>
         <div className="flex items-center justify-between">
-            <span className="text-[8px] font-black tracking-[0.4em] text-indigo-500 uppercase">Masterpiece Collection</span>
+            <span className="text-[9px] font-black tracking-[0.5em] text-gold uppercase">Authentic Script</span>
             {isOutOfStock ? (
-              <span className="text-[9px] font-black text-red-500 uppercase flex items-center gap-1.5"><X className="w-3 h-3" /> ARCHIVED</span>
+              <span className="text-[10px] font-black text-red-500 uppercase flex items-center gap-1.5"><X className="w-3.5 h-3.5" /> ARCHIVED</span>
             ) : product.stock > 0 && product.stock < 5 ? (
-              <span className="text-[9px] font-black text-red-600 animate-pulse uppercase tracking-wider flex items-center gap-1.5 bg-red-50 px-2 py-0.5 rounded-full border border-red-100">
-                ONLY {product.stock} LEFT!
+              <span className="text-[10px] font-black text-red-600 animate-pulse uppercase tracking-widest flex items-center gap-1.5 bg-red-500/10 px-3 py-1 rounded-full border border-red-500/10">
+                LIMITED EDITION
               </span>
             ) : (
               <div className="flex items-center gap-1">
-                 {[...Array(5)].map((_, i) => <Star key={i} className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400" />)}
-                 <span className="text-[8px] font-black text-gray-400 ml-1">(5.0)</span>
+                 {[...Array(5)].map((_, i) => <Star key={i} className="w-3 h-3 fill-gold text-gold" />)}
               </div>
             )}
         </div>
-        <h3 className="text-xl font-black text-foreground tracking-tight line-clamp-1">
+        <h3 className={`${cinzel.className} text-2xl font-bold text-foreground tracking-tight line-clamp-1`}>
           {product.title}
         </h3>
         <div className="flex items-center justify-between" suppressHydrationWarning>
-          <p className="text-xl font-black text-foreground/40 font-serif italic">
-            PKR {product.price.toLocaleString()}
+          <p className="text-2xl font-black text-foreground/30 font-serif italic">
+            Rs. {product.price.toLocaleString()}
           </p>
-          <div className="w-8 h-[1px] bg-indigo-500/20" suppressHydrationWarning />
+          <div className="w-12 h-[1px] bg-gold/30" suppressHydrationWarning />
         </div>
       </div>
 
