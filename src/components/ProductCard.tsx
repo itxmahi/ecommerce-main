@@ -15,6 +15,13 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+interface Review {
+  id: string;
+  userName: string;
+  rating: number;
+  comment: string;
+}
+
 interface Product {
   id: string;
   title: string;
@@ -22,6 +29,7 @@ interface Product {
   image: string;
   category: string;
   stock: number;
+  reviews?: Review[];
 }
 
 export default function ProductCard({ product }: { product: Product }) {
@@ -135,8 +143,28 @@ export default function ProductCard({ product }: { product: Product }) {
                 LIMITED EDITION
               </span>
             ) : (
-              <div className="flex items-center gap-1">
-                 {[...Array(5)].map((_, i) => <Star key={i} className="w-3 h-3 fill-gold text-gold" />)}
+              <div className="flex items-center gap-2">
+                 <div className="flex gap-0.5">
+                    {[1, 2, 3, 4, 5].map((star) => {
+                      const avg = product.reviews && product.reviews.length > 0 
+                        ? product.reviews.reduce((acc, r) => acc + r.rating, 0) / product.reviews.length 
+                        : 0;
+                      return (
+                        <Star 
+                          key={star} 
+                          className={cn(
+                            "w-3 h-3",
+                            avg >= star ? "fill-amber-400 text-amber-400" : "text-gray-200"
+                          )} 
+                        />
+                      );
+                    })}
+                 </div>
+                 {product.reviews && product.reviews.length > 0 ? (
+                   <span className="text-[9px] font-black text-muted tracking-tight">({product.reviews.length})</span>
+                 ) : (
+                   <span className="text-[10px] font-black text-indigo-500/60 uppercase tracking-[0.2em]">New</span>
+                 )}
               </div>
             )}
         </div>

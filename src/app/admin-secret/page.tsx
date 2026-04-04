@@ -1,11 +1,15 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { Cinzel } from 'next/font/google';
+
+const cinzel = Cinzel({ subsets: ["latin"] });
 import { 
   Plus, Trash2, Edit2, ShoppingBag, List, Package, 
   TrendingUp, Search, PlusCircle, X, Check, Settings, 
   ShieldCheck, BarChart3, LayoutDashboard, Database,
-  Eye, MonitorDot, History, ArrowUpRight, BadgeCheck, Loader2
+  Eye, MonitorDot, History, ArrowUpRight, BadgeCheck, Loader2,
+  MessageSquare, Star, MapPin, Pin
 } from 'lucide-react';
 import Image from 'next/image';
 import Cropper from 'react-easy-crop';
@@ -24,6 +28,7 @@ interface Product {
   image: string;
   category: string;
   stock: number;
+  isPinned: boolean;
 }
 
 interface HeroSlide {
@@ -38,7 +43,8 @@ export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'settings'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'settings' | 'reviews'>('products');
+  const [reviews, setReviews] = useState<any[]>([]);
   const [heroImageSrc, setHeroImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -57,6 +63,7 @@ export default function AdminPage() {
     image: '',
     category: '',
     stock: 0,
+    isPinned: false,
   });
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
   const [isUploadingSlide, setIsUploadingSlide] = useState(false);
@@ -72,6 +79,7 @@ export default function AdminPage() {
     fetchHeroSlides();
     fetchHeroDelay();
     fetchHeroVideoStatus();
+    fetchReviews();
   }, []);
 
   const fetchHeroVideoStatus = async () => {
@@ -139,6 +147,18 @@ export default function AdminPage() {
     }
   };
 
+  const fetchReviews = async () => {
+    try {
+      const res = await fetch('/api/reviews/all');
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setReviews(data);
+      }
+    } catch (e) {
+      console.error("Reviews fetch failed", e);
+    }
+  };
+
   const handleOpenModal = (product?: Product) => {
     setProductImageSrc(null);
     if (product) {
@@ -150,10 +170,11 @@ export default function AdminPage() {
         image: product.image,
         category: product.category,
         stock: product.stock,
+        isPinned: product.isPinned || false,
       });
     } else {
       setEditingProduct(null);
-      setFormData({ title: '', description: '', price: 0, image: '', category: '', stock: 0 });
+      setFormData({ title: '', description: '', price: 0, image: '', category: '', stock: 0, isPinned: false });
     }
     setIsModalOpen(true);
   };
@@ -256,7 +277,7 @@ export default function AdminPage() {
         fetchProducts(); 
       } else {
         const errorData = await res.json();
-        throw new Error(errorData.message || 'Database could not finalize the entry.');
+        throw new Error(errorData.message || errorData.error || 'Database could not finalize the entry.');
       }
     } catch (err: any) {
       console.error("[DEBUG] Finalization Error:", err);
@@ -317,6 +338,17 @@ export default function AdminPage() {
       });
     } catch (e) {
       console.error("Video toggle sync failed", e);
+    }
+  };
+
+  const handleDeleteReview = async (id: string) => {
+    if (confirm('Permanently delete this review?')) {
+      try {
+        const res = await fetch(`/api/reviews/${id}`, { method: 'DELETE' });
+        if (res.ok) fetchReviews();
+      } catch (err) {
+        console.error("Review delete failed", err);
+      }
     }
   };
   const handleSlideUpload = async (file: File, type: 'IMAGE' | 'VIDEO', croppedBlob?: Blob) => {
@@ -387,7 +419,7 @@ export default function AdminPage() {
               <ShieldCheck className="w-10 h-10 text-indigo-600 dark:text-indigo-500 group-hover:scale-110 transition-transform duration-700" strokeWidth={1.5} />
            </div>
            <div className="space-y-4">
-              <h1 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight uppercase">Store <span className="text-indigo-600 italic font-serif lowercase tracking-normal">Dashboard</span></h1>
+               <h1 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight uppercase italic font-serif">RUHQALAM <span className="text-indigo-600 lowercase tracking-normal font-sans not-italic">Dashboard</span></h1>
               <p className="text-gray-400 dark:text-gray-600 text-[10px] font-black tracking-[0.4em] uppercase">Manage your boutique archive</p>
            </div>
            <form onSubmit={handleLogin} className="space-y-6">
@@ -413,16 +445,16 @@ export default function AdminPage() {
         {/* Gallery-Style Header */}
         <header className="flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-12 border-b border-gray-100 dark:border-white/5 pb-10 md:pb-16 text-center lg:text-left">
           <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
-             <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden ring-2 md:ring-4 ring-white dark:ring-white/5 shadow-2xl rotate-3 hover:rotate-0 transition-all duration-700">
-                <Image src="/logo.jpeg" alt="Logo" fill className="object-cover" />
+             <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden ring-2 md:ring-4 ring-white dark:ring-white/5 shadow-2xl rotate-3 hover:rotate-0 transition-all duration-700">
+                <Image src="/logo.png" alt="Logo" fill className="object-cover" />
              </div>
-             <div className="space-y-1 md:space-y-2">
-                <h1 className="text-4xl md:text-7xl font-black tracking-tighter md:tracking-[-0.04em] uppercase leading-none text-gray-900 dark:text-white">
+             <div className="space-y-1 md:space-y-4">
+                <h1 className={cn(cinzel.className, "text-4xl md:text-7xl font-black tracking-tighter md:tracking-[-0.04em] uppercase leading-none text-gray-900 dark:text-white")}>
                    RUHQALAM <span className="text-indigo-600 italic font-serif lowercase tracking-normal">Dashboard</span>
                 </h1>
                 <div className="flex items-center justify-center lg:justify-start gap-3 md:gap-4">
-                   <MonitorDot className="w-3 h-3 md:w-4 md:h-4 text-green-500 animate-pulse" />
-                   <p className="text-[8px] md:text-[10px] font-black text-gray-500 dark:text-gray-600 tracking-[0.2em] md:tracking-[0.4em] uppercase">Management Center | Boutique v2.0</p>
+                   <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
+                   <p className="text-[8px] md:text-[10px] font-black text-gray-500 dark:text-gray-600 tracking-[0.4em] md:tracking-[0.6em] uppercase">SPIRIT OF THE PEN • ARTISAN COMMAND CENTER</p>
                 </div>
              </div>
           </div>
@@ -431,6 +463,7 @@ export default function AdminPage() {
             {[
               { id: 'products', label: 'INVENTORY', icon: <Database className="w-3.5 h-3.5" /> },
               { id: 'orders', label: 'ANALYTICS', icon: <BarChart3 className="w-3.5 h-3.5" /> },
+              { id: 'reviews', label: 'REVIEWS', icon: <MessageSquare className="w-3.5 h-3.5" /> },
               { id: 'settings', label: 'GLOBAL', icon: <LayoutDashboard className="w-3.5 h-3.5" /> }
             ].map((tab) => (
               <button
@@ -489,10 +522,17 @@ export default function AdminPage() {
                         <img src={product.image} alt={product.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3s]" />
                     </div>
                     <div className="flex-grow flex flex-col items-center md:flex-row md:items-center justify-between gap-6 md:gap-12 w-full text-center md:text-left">
-                       <div className="space-y-3">
-                          <span className="text-[10px] font-black text-indigo-500 tracking-[0.5em] uppercase px-4 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 rounded-full">{product.category}</span>
-                          <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{product.title}</h3>
-                       </div>
+                        <div className="space-y-3">
+                           <div className="flex items-center gap-3">
+                             <span className="text-[10px] font-black text-indigo-500 tracking-[0.5em] uppercase px-4 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 rounded-full">{product.category}</span>
+                             {product.isPinned && (
+                               <span className="text-[10px] font-black text-white px-4 py-1.5 bg-indigo-600 rounded-full flex items-center gap-2 shadow-lg animate-bounce">
+                                 <Pin className="w-2.5 h-2.5 fill-current" /> PINNED
+                               </span>
+                             )}
+                           </div>
+                           <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{product.title}</h3>
+                        </div>
                        <div className="flex flex-wrap items-center justify-center gap-16">
                           <div className="space-y-1">
                              <p className="text-[9px] font-black text-gray-400 tracking-[0.3em] uppercase">PRODUCT PRICE</p>
@@ -578,6 +618,62 @@ export default function AdminPage() {
                            </div>
                          ))}
                       </div>
+                   </div>
+                 ))}
+               </div>
+             )}
+          </div>
+        )}
+
+        {activeTab === 'reviews' && (
+          <div className="space-y-8 md:space-y-12 animate-in fade-in slide-in-from-left-10 duration-1000 pb-40">
+             <div className="flex flex-col md:flex-row items-center gap-8 bg-white dark:bg-[#0a0a0a] p-10 md:p-16 rounded-[4rem] border border-gray-100 dark:border-white/5 shadow-2xl">
+                <div className="w-20 h-20 bg-indigo-600 rounded-[2rem] flex items-center justify-center shadow-2xl shadow-indigo-500/30"><MessageSquare className="w-10 h-10 text-white" /></div>
+                <div className="text-center md:text-left">
+                   <h3 className="text-4xl font-black text-gray-900 dark:text-white uppercase tracking-tight leading-none mb-1">Full Reviews Inventory</h3>
+                   <p className="text-[10px] font-black text-gray-500 tracking-[0.4em] uppercase">Total Reviews: {reviews.length} | Master Control (Delete Any Review)</p>
+                </div>
+             </div>
+
+             {reviews.length === 0 ? (
+               <div className="py-48 text-center bg-white dark:bg-[#0a0a0a] rounded-[5rem] border border-gray-100 dark:border-white/5 space-y-8">
+                  <MonitorDot className="w-20 h-20 text-indigo-100 dark:text-white/5 mx-auto" strokeWidth={1} />
+                  <p className="text-[12px] font-black text-gray-500 tracking-[0.5em] uppercase leading-none">No Reviews Available</p>
+               </div>
+             ) : (
+               <div className="grid grid-cols-1 gap-8">
+                 {reviews.map((review: any) => (
+                   <div key={review.id} className="bg-white dark:bg-[#0a0a0a] p-8 md:p-12 rounded-[2.5rem] md:rounded-[4.5rem] shadow-xl border border-gray-100 dark:border-white/5 flex flex-col md:flex-row items-center gap-8 md:gap-12 transition-all duration-700 group hover:border-indigo-500/20">
+                      <div className="relative w-24 h-24 md:w-40 md:h-40 rounded-[2rem] overflow-hidden bg-gray-50 dark:bg-white/5 shadow-inner shrink-0 group-hover:scale-105 transition-transform duration-700">
+                         <img src={review.product?.image || '/placeholder.jpg'} alt="Product" className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-grow space-y-5 text-center md:text-left">
+                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-6">
+                            <div className="flex gap-1.5 p-2 bg-indigo-500/5 rounded-full px-4 border border-indigo-500/10">
+                               {[1, 2, 3, 4, 5].map((star) => (
+                                 <Star key={star} className={cn("w-4 h-4", review.rating >= star ? 'fill-gold text-gold drop-shadow-sm' : 'text-gray-200 dark:text-white/5')} />
+                               ))}
+                            </div>
+                            <span className="text-[9px] font-black text-indigo-500 tracking-[0.3em] uppercase bg-indigo-500/5 px-4 py-1.5 rounded-full border border-indigo-100 dark:border-indigo-500/10">PROD: {review.product?.title || 'System Ref'}</span>
+                            <span className="text-[9px] font-black text-gray-400 tracking-widest uppercase">{new Date(review.createdAt).toLocaleDateString()}</span>
+                         </div>
+                         <div className="space-y-2">
+                             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                                <h4 className="text-2xl font-black text-gray-900 dark:text-white uppercase leading-none tracking-tight">{review.userName}</h4>
+                                <span className={cn("text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest flex items-center gap-1.5", 
+                                  "bg-gold/5 text-gold border border-gold/20")}>
+                                  <MapPin className="w-3.5 h-3.5" /> {review.userCity || 'ISLAMABAD'}
+                                </span>
+                             </div>
+                            <p className="text-lg md:text-xl text-gray-500 font-medium leading-relaxed italic selection:bg-gold/10">"{review.comment}"</p>
+                         </div>
+                      </div>
+                      <button 
+                        onClick={() => handleDeleteReview(review.id)}
+                        className="p-8 md:p-10 bg-gray-50 dark:bg-white/5 text-gray-400 hover:text-white hover:bg-red-600 rounded-[2.5rem] md:rounded-[3.5rem] border border-gray-100 dark:border-white/5 transition-all shadow-xl active:scale-95"
+                      >
+                         <Trash2 className="w-7 h-7" />
+                      </button>
                    </div>
                  ))}
                </div>
@@ -788,6 +884,30 @@ export default function AdminPage() {
                            <div className="space-y-4">
                               <label className="text-[11px] font-black text-gray-400 tracking-[0.4em] uppercase ml-4">PRODUCT DESCRIPTION</label>
                               <textarea required value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} rows={5} className="w-full px-6 md:px-10 py-4 md:py-6 rounded-[1.5rem] md:rounded-[2rem] bg-gray-50 dark:bg-white/[0.04] border border-gray-100 dark:border-white/5 focus:border-indigo-500 outline-none font-medium text-lg leading-relaxed text-gray-500 transition-all resize-none shadow-lg" />
+                           </div>
+                           <div className="flex items-center justify-between bg-gray-50 dark:bg-white/[0.04] p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-inner">
+                              <div className="flex items-center gap-6">
+                                 <div className={cn("p-4 rounded-3xl transition-all duration-500 shadow-xl", formData.isPinned ? "bg-indigo-600 text-white rotate-12" : "bg-white dark:bg-black/20 text-gray-400 -rotate-12")}>
+                                    <Pin className={cn("w-6 h-6", formData.isPinned ? "fill-current" : "")} />
+                                 </div>
+                                 <div className="space-y-1">
+                                    <p className="text-[12px] font-black text-gray-900 dark:text-white tracking-widest uppercase">PIN TO TOP</p>
+                                    <p className="text-[9px] font-black text-gray-400 tracking-widest uppercase">Feature item at the start of gallery</p>
+                                 </div>
+                              </div>
+                              <button 
+                                type="button"
+                                onClick={() => setFormData({...formData, isPinned: !formData.isPinned})}
+                                className={cn(
+                                   "w-16 h-8 rounded-full relative transition-all duration-500",
+                                   formData.isPinned ? "bg-indigo-600" : "bg-gray-200 dark:bg-white/10"
+                                )}
+                              >
+                                 <div className={cn(
+                                    "absolute top-1 w-6 h-6 bg-white rounded-full transition-all duration-500 shadow-lg",
+                                    formData.isPinned ? "left-9" : "left-1"
+                                 )} />
+                              </button>
                            </div>
                            <div className="space-y-4">
                               <div className="flex items-center justify-between ml-4">

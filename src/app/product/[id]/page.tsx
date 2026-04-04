@@ -1,7 +1,8 @@
 import { getProductById, getProducts } from '@/lib/data';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { AddToCartButton } from '@/components';
+import { AddToCartButton, ReviewSection } from '@/components';
+import { Star } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 import { Heart, ShoppingBag, Truck, ShieldCheck, RefreshCcw } from 'lucide-react';
@@ -13,6 +14,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   if (!product) {
     return notFound();
   }
+
+  const reviews = product.reviews || [];
+  const averageRating = reviews.length > 0 
+    ? (reviews.reduce((acc, rev) => acc + rev.rating, 0) / reviews.length).toFixed(1)
+    : null;
 
   return (
     <div className="max-w-7xl mx-auto px-6 space-y-24 pt-12">
@@ -48,6 +54,22 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <p className="text-3xl font-black text-indigo-600 tracking-tighter">
               Rs. {product.price.toLocaleString()}
             </p>
+            {averageRating && (
+              <div className="flex items-center gap-3 bg-secondary/30 w-fit px-4 py-2 rounded-full border border-border">
+                <div className="flex gap-0.5">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={`w-4 h-4 ${
+                        Number(averageRating) >= star ? 'fill-amber-400 text-amber-400' : 'text-gray-300'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-sm font-black text-foreground">{averageRating} / 5</span>
+                <span className="text-xs text-muted font-bold">({reviews.length} reviews)</span>
+              </div>
+            )}
           </div>
 
           <p className="text-lg text-muted leading-relaxed max-w-xl font-medium">
@@ -86,6 +108,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           </div>
         </div>
       </div>
+      <ReviewSection productId={product.id} initialReviews={reviews} />
     </div>
   );
 }

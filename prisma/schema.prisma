@@ -15,6 +15,7 @@ model Product {
   image       String
   category    String
   stock       Int
+  isPinned    Boolean  @default(false)
   reviews     Review[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -44,10 +45,10 @@ model OrderItem {
 
 model Review {
   id        String   @id @default(cuid())
-  name      String
+  userName  String
+  userCity  String?
   rating    Int
   comment   String
-  image     String?
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())

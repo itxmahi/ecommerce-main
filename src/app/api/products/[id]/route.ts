@@ -15,8 +15,12 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const updated = await updateProduct(resolvedParams.id, body);
     if (!updated) return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     return NextResponse.json(updated);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
+  } catch (error: any) {
+    console.error('[API Error] Product Update Failed:', error);
+    return NextResponse.json({ 
+      error: 'Failed to update', 
+      message: error.message || 'Unknown database error' 
+    }, { status: 500 });
   }
 }
 

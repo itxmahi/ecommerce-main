@@ -3,9 +3,8 @@ import { Inter, Cinzel } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { Navbar, Footer } from "@/components";
-import LoadingBar from "@/components/LoadingBar";
-import { Suspense } from "react";
 import Image from "next/image";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 const cinzel = Cinzel({ subsets: ["latin"] });
@@ -23,10 +22,20 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="overflow-x-hidden">
       <body className={`${inter.className} min-h-screen flex flex-col overflow-x-hidden`} suppressHydrationWarning>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-WNCQQ1LXG7"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-WNCQQ1LXG7');
+          `}
+        </Script>
         <CartProvider>
-          <Suspense fallback={null}>
-            <LoadingBar />
-          </Suspense>
           <Navbar />
           <main className="flex-grow pt-24 pb-12">
             {children}

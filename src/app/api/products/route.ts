@@ -11,7 +11,11 @@ export async function POST(request: Request) {
     const body = await request.json();
     const newProduct = await addProduct(body);
     return NextResponse.json(newProduct, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
+  } catch (error: any) {
+    console.error('[API Error] Product Creation Failed:', error);
+    return NextResponse.json({ 
+      error: 'Failed to create product', 
+      message: error.message || 'Unknown database error' 
+    }, { status: 500 });
   }
 }
