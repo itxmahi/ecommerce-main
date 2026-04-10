@@ -135,7 +135,7 @@ export default function RootLayout({
 
 
         <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-WNCQQ1LXG7"
+          src="https://www.googletagmanager.com/gtag/js?id=G-28LXMSCWL1"
           strategy="afterInteractive"
         />
         <Script id="google-analytics" strategy="afterInteractive">
@@ -144,9 +144,10 @@ export default function RootLayout({
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
 
-            gtag('config', 'G-WNCQQ1LXG7');
+            gtag('config', 'G-28LXMSCWL1');
           `}
         </Script>
+
         <CartProvider>
           <Navbar />
           <main className="flex-grow pt-24 pb-12">
