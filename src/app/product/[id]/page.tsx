@@ -1,4 +1,6 @@
+import type { Metadata } from 'next';
 import { getProductById, getProducts } from '@/lib/data';
+
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { AddToCartButton, ReviewSection } from '@/components';
@@ -6,6 +8,36 @@ import { Star } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 import { Heart, ShoppingBag, Truck, ShieldCheck, RefreshCcw } from 'lucide-react';
+
+// Enhanced Dynamic Metadata for SEO
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const resolvedParams = await params;
+  const product = await getProductById(resolvedParams.id);
+  
+  if (!product) {
+    return {
+      title: "Product Not Found",
+      description: "The requested art piece could not be found."
+    };
+  }
+
+  return {
+    title: product.title,
+    description: product.description.substring(0, 160),
+    openGraph: {
+      title: `${product.title} | RUHQALAM`,
+      description: product.description.substring(0, 160),
+      images: [{ url: product.image }],
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.title,
+      description: product.description.substring(0, 160),
+      images: [product.image],
+    },
+  };
+}
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
@@ -20,9 +52,77 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     ? (reviews.reduce((acc, rev) => acc + rev.rating, 0) / reviews.length).toFixed(1)
     : null;
 
+  // JSON-LD Structured Data
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.title,
+    "image": product.image,
+    "description": product.description,
+    "sku": product.id,
+    "brand": {
+      "@type": "Brand",
+      "name": "RUHQALAM"
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://ruhqalam.com'}/product/${product.id}`,
+      "priceCurrency": "PKR",
+      "price": product.price,
+      "itemCondition": "https://schema.org/NewCondition",
+      "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "seller": {
+        "@type": "Organization",
+        "name": "RUHQALAM"
+      }
+    },
+    ...(averageRating && {
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": averageRating,
+        "reviewCount": reviews.length
+      }
+    })
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": process.env.NEXT_PUBLIC_BASE_URL || 'https://ruhqalam.com'
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": product.category,
+        "item": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://ruhqalam.com'}/?category=${product.category}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": product.title,
+        "item": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://ruhqalam.com'}/product/${product.id}`
+      }
+    ]
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-6 space-y-24 pt-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+
         {/* Product Image Section */}
         <div className="relative aspect-square rounded-3xl overflow-hidden border border-border shadow-2xl bg-secondary/20">
           <Image
@@ -113,13 +213,4 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   );
 }
 
-// Optional: Metadata for SEO
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = await params;
-  const product = await getProductById(resolvedParams.id);
-  if (!product) return { title: 'Product Not Found' };
-  return {
-    title: `${product.title} | AESTHETIQ Store`,
-    description: product.description,
-  };
-}
+

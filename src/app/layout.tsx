@@ -9,10 +9,112 @@ import Script from "next/script";
 const inter = Inter({ subsets: ["latin"] });
 const cinzel = Cinzel({ subsets: ["latin"] });
 
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://ruhqalam.com';
+
 export const metadata: Metadata = {
-  title: "RUHQALAM | Premium Calligraphy",
-  description: "Experience premium shopping with our curated collection of islamic art and calligraphy items.",
+  metadataBase: new URL(baseUrl),
+  title: {
+    default: "RUHQALAM | Premium Islamic Art & Calligraphy",
+    template: "%s | RUHQALAM"
+  },
+  description: "Experience the divine beauty of RUHQALAM's premium Islamic art. Hand-painted calligraphy and spiritual decor crafted with museum-quality materials to transform your living space.",
+  keywords: [
+    "Islamic Art", "Premium Calligraphy", "Islamic Home Decor", 
+    "Handmade Islamic Art", "RUHQALAM Calligraphy", "Spiritual Wall Art", 
+    "Modern Islamic Calligraphy", "Islamic Gifts", "Quranic Art", 
+    "Arabic Calligraphy Pakistan"
+  ],
+  authors: [{ name: "RUHQALAM" }],
+  creator: "RUHQALAM",
+  publisher: "RUHQALAM",
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_PK", // Specific to Pakistan
+    url: baseUrl,
+    siteName: "RUHQALAM",
+    title: "RUHQALAM | Premium Islamic Art & Calligraphy",
+    description: "Premium hand-painted Islamic calligraphy and spiritual art collection.",
+    images: [
+      {
+        url: "/images/og-image.jpeg",
+        width: 1200,
+        height: 630,
+        alt: "RUHQALAM Islamic Art Collection Preview",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "RUHQALAM | Premium Islamic Art",
+    description: "Museum-quality Islamic calligraphy and spiritual art that transforms your spaces.",
+    images: ["/images/og-image.jpeg"],
+    creator: "@ruhqalam",
+  },
+  verification: {
+    google: "google-site-verification-id", // User should replace this
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/logo.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [
+      { url: "/logo.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  robots: {
+    index: true,
+
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
+
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "RUHQALAM",
+  "url": baseUrl,
+  "logo": `${baseUrl}/logo.png`,
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+92-345-5096636",
+    "contactType": "customer service",
+    "areaServed": "PK",
+    "availableLanguage": ["English", "Urdu"]
+  },
+  "sameAs": [
+    "https://facebook.com/ruhqalam",
+    "https://instagram.com/calligraphy_art_244",
+    "https://tiktok.com/@calligraphy_art_244"
+  ]
+};
+
+const searchBoxJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "url": baseUrl,
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": `${baseUrl}/?q={search_term_string}`
+    },
+    "query-input": "required name=search_term_string"
+  }
+};
+
+
+
 
 export default function RootLayout({
   children,
@@ -22,6 +124,16 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="overflow-x-hidden">
       <body className={`${inter.className} min-h-screen flex flex-col overflow-x-hidden`} suppressHydrationWarning>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(searchBoxJsonLd) }}
+        />
+
+
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-WNCQQ1LXG7"
           strategy="afterInteractive"

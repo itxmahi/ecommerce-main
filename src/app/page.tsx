@@ -1,4 +1,6 @@
+import { Metadata } from 'next';
 import { getProducts } from '@/lib/data';
+
 import { ProductCard, HeroSection, CustomOrder, Testimonials } from '@/components';
 import { Search, Filter, ShoppingBag } from 'lucide-react';
 import { Cinzel } from 'next/font/google';
@@ -8,14 +10,34 @@ const cinzel = Cinzel({ subsets: ["latin"] });
 
 export const dynamic = 'force-dynamic';
 
+export async function generateMetadata({ 
+  searchParams 
+}: { 
+  searchParams: Promise<{ q?: string; category?: string }> 
+}): Promise<Metadata> {
+  const resolvedParams = await searchParams;
+  const q = resolvedParams.q;
+  const category = resolvedParams.category;
+
+  if (q) {
+    return { title: `Search results for "${q}"` };
+  }
+  if (category) {
+    return { title: `${category} Collection` };
+  }
+  return {}; // Use default from layout
+}
+
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: { q?: string; category?: string };
+  searchParams: Promise<{ q?: string; category?: string }>;
 }) {
+  const resolvedParams = await searchParams;
   const allProducts = await getProducts();
-  const query = searchParams.q?.toLowerCase() || '';
-  const categoryFilter = searchParams.category || '';
+  const query = resolvedParams.q?.toLowerCase() || '';
+  const categoryFilter = resolvedParams.category || '';
+
 
   const filteredProducts = allProducts.filter((product: any) => {
     const matchesQuery = product.title.toLowerCase().includes(query) || product.description.toLowerCase().includes(query);
