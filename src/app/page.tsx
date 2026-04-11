@@ -1,14 +1,12 @@
 import { Metadata } from 'next';
-import { getProducts } from '@/lib/data';
+import { getProducts, getHeroSlides, getSetting } from '@/lib/data';
 
 import { ProductCard, HeroSection, CustomOrder, Testimonials } from '@/components';
-import { Search, Filter, ShoppingBag } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Cinzel } from 'next/font/google';
 import Link from 'next/link';
 
 const cinzel = Cinzel({ subsets: ["latin"] });
-
-export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ 
   searchParams 
@@ -25,7 +23,7 @@ export async function generateMetadata({
   if (category) {
     return { title: `${category} Collection` };
   }
-  return {}; // Use default from layout
+  return {};
 }
 
 export default async function HomePage({
@@ -34,7 +32,15 @@ export default async function HomePage({
   searchParams: Promise<{ q?: string; category?: string }>;
 }) {
   const resolvedParams = await searchParams;
-  const allProducts = await getProducts();
+  
+  // Parallel fetching for performance
+  const [allProducts, heroSlides, heroDelay, heroVideoEnabled] = await Promise.all([
+    getProducts(),
+    getHeroSlides(),
+    getSetting('heroDelay'),
+    getSetting('heroVideoEnabled')
+  ]);
+
   const query = resolvedParams.q?.toLowerCase() || '';
   const categoryFilter = resolvedParams.category || '';
 
@@ -48,12 +54,17 @@ export default async function HomePage({
   const categories = Array.from(new Set(allProducts.map((p: any) => p.category))) as string[];
 
   return (
-    <div className="max-w-7xl mx-auto px-6 space-y-12">
-      {/* Hero Section */}
-      <HeroSection />
+    <div className="space-y-12 pb-24">
+      {/* Hero Section - Now Full Bleed */}
+      <HeroSection 
+        initialSlides={heroSlides} 
+        initialDelay={heroDelay ? parseInt(heroDelay) : undefined}
+        initialVideoEnabled={heroVideoEnabled === 'true'}
+      />
 
-      {/* Filters and Search */}
-      <section className="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b">
+      <div className="max-w-7xl mx-auto px-6 space-y-12">
+        {/* Filters and Search */}
+        <section className="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b">
         <div className="flex flex-wrap items-center gap-3">
           <Link
             href="/"
@@ -114,6 +125,7 @@ export default async function HomePage({
 
       {/* Custom Order Section */}
       <CustomOrder />
+      </div>
     </div>
   );
 }

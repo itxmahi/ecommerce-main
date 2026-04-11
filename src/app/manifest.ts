@@ -7,13 +7,18 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'Experience premium shopping with our curated collection of islamic art and calligraphy items.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#ffffff',
-    theme_color: '#4f46e5',
+    background_color: '#fdfbf7',
+    theme_color: '#d4af37',
     icons: [
       {
-        src: '/favicon.ico',
-        sizes: 'any',
-        type: 'image/x-icon',
+        src: '/logo.png',
+        sizes: '192x192',
+        type: 'image/png',
+      },
+      {
+        src: '/logo.png',
+        sizes: '512x512',
+        type: 'image/png',
       },
     ],
   };

@@ -32,33 +32,32 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "en_PK", // Specific to Pakistan
+    locale: "en_PK",
     url: baseUrl,
     siteName: "RUHQALAM",
     title: "RUHQALAM | Premium Islamic Art & Calligraphy",
     description: "Premium hand-painted Islamic calligraphy and spiritual art collection.",
     images: [
       {
-        url: "/images/og-image.jpeg",
+        url: "/logo.png",
         width: 1200,
         height: 630,
-        alt: "RUHQALAM Islamic Art Collection Preview",
-      },
+        alt: "RUHQALAM Logo",
+      }
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: "RUHQALAM | Premium Islamic Art",
     description: "Museum-quality Islamic calligraphy and spiritual art that transforms your spaces.",
-    images: ["/images/og-image.jpeg"],
+    images: ["/logo.png"],
     creator: "@ruhqalam",
   },
   verification: {
-    google: "google-site-verification-id", // User should replace this
+    google: "google-site-verification-id",
   },
   icons: {
     icon: [
-      { url: "/favicon.ico" },
       { url: "/logo.png", sizes: "32x32", type: "image/png" },
     ],
     apple: [

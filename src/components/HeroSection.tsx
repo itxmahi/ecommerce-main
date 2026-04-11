@@ -7,6 +7,8 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, EffectFade, Parallax, Pagination } from 'swiper/modules';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
+
 
 // Import Swiper styles
 import 'swiper/css';
@@ -22,11 +24,21 @@ interface HeroSlide {
   type: 'IMAGE' | 'VIDEO';
 }
 
-export default function HeroSection() {
-  const [slides, setSlides] = useState<HeroSlide[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [heroDelay, setHeroDelay] = useState(5000);
-  const [videoEnabled, setVideoEnabled] = useState(true);
+interface HeroSectionProps {
+  initialSlides?: HeroSlide[];
+  initialDelay?: number;
+  initialVideoEnabled?: boolean;
+}
+
+export default function HeroSection({ 
+  initialSlides = [], 
+  initialDelay = 5000, 
+  initialVideoEnabled = true 
+}: HeroSectionProps) {
+  const [slides, setSlides] = useState<HeroSlide[]>(initialSlides);
+  const [isLoading, setIsLoading] = useState(initialSlides.length === 0);
+  const [heroDelay, setHeroDelay] = useState(initialDelay);
+  const [videoEnabled, setVideoEnabled] = useState(initialVideoEnabled);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { scrollY } = useScroll();
@@ -34,29 +46,32 @@ export default function HeroSection() {
   const scale = useTransform(scrollY, [0, 400], [1, 0.95]);
 
   useEffect(() => {
-    Promise.all([
-      fetch('/api/settings?key=heroDelay').then(res => res.json()),
-      fetch('/api/settings?key=heroVideoEnabled').then(res => res.json())
-    ]).then(([delayData, videoData]) => {
-      if (delayData?.value) setHeroDelay(parseInt(delayData.value));
-      if (videoData?.value) setVideoEnabled(videoData.value === 'true');
-    }).catch(err => console.error("Settings fetch failed", err));
+    // Only fetch if not provided via props
+    if (initialSlides.length === 0) {
+      Promise.all([
+        fetch('/api/settings?key=heroDelay').then(res => res.json()),
+        fetch('/api/settings?key=heroVideoEnabled').then(res => res.json())
+      ]).then(([delayData, videoData]) => {
+        if (delayData?.value) setHeroDelay(parseInt(delayData.value));
+        if (videoData?.value) setVideoEnabled(videoData.value === 'true');
+      }).catch(err => console.error("Settings fetch failed", err));
 
-    fetch('/api/hero-slides')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setSlides(data);
-        } else {
+      fetch('/api/hero-slides')
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data) && data.length > 0) {
+            setSlides(data);
+          } else {
+            setSlides([{ id: 'default', url: '/images/box-1.jpeg', type: 'IMAGE' }]);
+          }
+        })
+        .catch(err => {
+          console.error(err);
           setSlides([{ id: 'default', url: '/images/box-1.jpeg', type: 'IMAGE' }]);
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        setSlides([{ id: 'default', url: '/images/box-1.jpeg', type: 'IMAGE' }]);
-      })
-      .finally(() => setIsLoading(false));
-  }, []);
+        })
+        .finally(() => setIsLoading(false));
+    }
+  }, [initialSlides]);
 
   const visibleSlides = videoEnabled ? slides : slides.filter(s => s.type !== 'VIDEO');
 
@@ -71,8 +86,8 @@ export default function HeroSection() {
   return (
     <motion.section 
       ref={containerRef}
-      style={{ opacity, scale }}
-      className="relative mx-auto mt-8 max-w-[1400px] h-[500px] md:h-[750px] rounded-[3.5rem] overflow-hidden group shadow-[0_80px_160px_-40px_rgba(0,0,0,0.4)] bg-black border border-white/5"
+      style={{ opacity }}
+      className="relative w-full h-[600px] md:h-[90vh] overflow-hidden group bg-zinc-950"
     >
       <Swiper
         key={`${heroDelay}-${videoEnabled}`}
@@ -90,9 +105,10 @@ export default function HeroSection() {
       >
         {visibleSlides.map((slide) => (
           <SwiperSlide key={slide.id}>
-            <div className="relative w-full h-full overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/20 to-transparent z-20" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 z-20" />
+              {/* Subtle gradients removed/reduced to show BG image clearly as requested */}
+              {/* Subtle radial gradient to keep center image clear while ensuring button readability */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.2)_100%)] z-20" />
+              <div className="absolute inset-0 bg-black/5 z-20" />
               
               {slide.type === 'VIDEO' ? (
                 <video 
@@ -107,61 +123,97 @@ export default function HeroSection() {
                     alt="Premium Artwork" 
                     fill
                     priority={visibleSlides.indexOf(slide) === 0}
-                    className="object-cover scale-105 transition-transform duration-[4s]"
+                    className="object-cover scale-100 transition-transform duration-[4s]"
                   />
                 </div>
               )}
-            </div>
             
-            <motion.div 
-               initial={{ opacity: 0, y: 30 }}
-               whileInView={{ opacity: 1, y: 0 }}
-               transition={{ duration: 1.2, ease: "easeOut" }}
-               className="absolute inset-0 z-30 flex flex-col items-start justify-center px-10 md:px-24 space-y-8"
-            >
-             
-               </div>
-
-               <div className="flex items-center gap-10 mt-12 pointer-events-auto">
-                  <button 
-                    onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="bg-white text-black px-12 py-5 rounded-full text-[12px] font-bold tracking-[0.2em] transition-all duration-500 hover:bg-zinc-200 active:scale-95 flex items-center gap-3 group"
+            {/* Content Overlay - Professional Ad Style */}
+            <div className="absolute inset-0 z-30 flex items-center px-10 md:px-24">
+              <motion.div 
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 1, ease: "easeOut" }}
+                className="max-w-xl flex flex-col items-start gap-8"
+              >
+                <div className="space-y-4">
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="flex items-center gap-4"
                   >
-                    SHOP NOW <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                  <p className={`${cinzel.className} text-white/40 text-[10px] font-bold tracking-[0.3em] uppercase leading-relaxed max-w-[150px]`}>
-                     HANDCRAFTED <br /> IN ISLAMABAD
+                    <span className="h-[1px] w-12 bg-gold/50" />
+                    <span className={`${inter.className} text-gold text-[10px] uppercase font-black tracking-[0.6em]`}>
+                      Premier Experience
+                    </span>
+                  </motion.div>
+
+                  <h2 className={`${cinzel.className} text-white text-5xl md:text-7xl font-light leading-tight tracking-tight`}>
+                    Defining The <br />
+                    <span className="font-black italic">Next Level</span>
+                  </h2>
+                  
+                  <p className={`${inter.className} text-white/50 text-xs md:text-sm max-w-md leading-relaxed tracking-wider font-medium`}>
+                    Explore a collection where master craftsmanship meets modern luxury. Every piece is a statement of perfection.
                   </p>
-               </div>
-            </motion.div>
+                </div>
+
+                <Link href="#products" className="pointer-events-auto">
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="relative group cursor-pointer"
+                  >
+                    <div className="absolute -inset-1 bg-gold/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    
+                    <button className={`${cinzel.className} relative px-10 py-5 rounded-full bg-white text-black text-[11px] font-black tracking-[0.4em] uppercase transition-all duration-700 group-hover:bg-gold group-hover:text-white flex items-center gap-4 shadow-[0_20px_40px_rgba(0,0,0,0.3)]`}>
+                      <span className="relative z-10">Shop Experience</span>
+                      <ChevronRight className="w-4 h-4 relative z-10 transition-transform duration-700 group-hover:translate-x-1" />
+                    </button>
+                  </motion.div>
+                </Link>
+              </motion.div>
+            </div>
           </SwiperSlide>
         ))}
 
-        {/* Apple Style Pagination Dots (Styles added to global CSS if needed, or via inline styles) */}
+        {/* Professional Minimalist Pagination */}
         <style jsx global>{`
           .swiper-pagination-bullet.apple-bullet {
-            width: 6px;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.4);
+            width: 40px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.2);
             opacity: 1;
-            transition: all 0.5s ease;
-            margin: 0 6px !important;
-            border-radius: 50%;
+            transition: all 0.7s ease;
+            margin: 0 4px !important;
+            border-radius: 0;
           }
           .swiper-pagination-bullet-active.apple-bullet-active {
-            width: 24px;
-            border-radius: 4px;
-            background: #fff;
-            box-shadow: 0 0 20px rgba(255,255,255,0.5);
+            width: 80px;
+            background: #d4af37;
+            box-shadow: 0 0 20px rgba(212,175,55,0.4);
           }
           .swiper-pagination {
-            bottom: 40px !important;
+            bottom: 60px !important;
+            left: 100px !important;
+            text-align: left !important;
+            display: flex;
+            align-items: center;
+          }
+          @media (max-width: 768px) {
+            .swiper-pagination {
+              left: 0 !important;
+              justify-content: center;
+              bottom: 40px !important;
+            }
           }
         `}</style>
       </Swiper>
       
-      {/* Glassmorphism Border */}
-      <div className="absolute inset-0 border border-white/5 rounded-[3.5rem] pointer-events-none z-50 shadow-[inset_0_0_100px_rgba(0,0,0,0.3)]" />
+      {/* Decorative Elements */}
+      <div className="absolute inset-0 border border-white/5 pointer-events-none z-50" />
+      <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-black/60 to-transparent pointer-events-none z-20" />
     </motion.section>
   );
 }
