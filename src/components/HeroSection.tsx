@@ -123,10 +123,10 @@ export default function HeroSection() {
                   <span className={`${inter.className} text-[11px] font-bold tracking-[0.4em] uppercase text-white/50 animate-pulse`}>
                      PREMIUM SELECTION • COLLECTION 2024
                   </span>
-                  <h1 className={`${inter.className} text-5xl md:text-8xl font-black text-white leading-[0.9] tracking-[-0.05em] uppercase`}>
+                  {/* <h1 className={`${inter.className} text-5xl md:text-8xl font-black text-white leading-[0.9] tracking-[-0.05em] uppercase`}>
                      AESTHETICS <br />
                      <span className="italic font-serif font-light lowercase tracking-normal text-white animate-fade-in">of the</span> <br />
-                     DIVINE.
+                     DIVINE. */}
                   </h1>
                </div>
 
