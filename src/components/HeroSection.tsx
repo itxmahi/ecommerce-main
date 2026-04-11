@@ -119,15 +119,7 @@ export default function HeroSection() {
                transition={{ duration: 1.2, ease: "easeOut" }}
                className="absolute inset-0 z-30 flex flex-col items-start justify-center px-10 md:px-24 space-y-8"
             >
-               <div className="space-y-4">
-                  <span className={`${inter.className} text-[11px] font-bold tracking-[0.4em] uppercase text-white/50 animate-pulse`}>
-                     PREMIUM SELECTION • COLLECTION 2024
-                  </span>
-                  {/* <h1 className={`${inter.className} text-5xl md:text-8xl font-black text-white leading-[0.9] tracking-[-0.05em] uppercase`}>
-                     AESTHETICS <br />
-                     <span className="italic font-serif font-light lowercase tracking-normal text-white animate-fade-in">of the</span> <br />
-                     DIVINE. */}
-                  </h1>
+             
                </div>
 
                <div className="flex items-center gap-10 mt-12 pointer-events-auto">
