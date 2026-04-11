@@ -105,7 +105,7 @@ export default async function HomePage({
         {/* Product Grid */}
         <section id="products">
           {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-10">
               {filteredProducts.map((product: any) => (
                 <ProductCard key={product.id} product={product} />
               ))}

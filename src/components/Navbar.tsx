@@ -74,8 +74,8 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
         
         {/* Luxury Logo */}
-        <Link href="/" className="flex items-center gap-4 md:gap-5 group">
-          <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden ring-1 ring-indigo-500/20 group-hover:ring-indigo-500 transition-all duration-700 shadow-2xl">
+        <Link href="/" className="flex items-center gap-3 md:gap-5 group">
+          <div className="relative w-10 h-10 md:w-16 md:h-16 rounded-full overflow-hidden ring-1 ring-indigo-500/20 group-hover:ring-indigo-500 transition-all duration-700 shadow-2xl">
             <Image 
               src="/logo.png" 
               alt="RUHQALAM Logo" 
@@ -85,8 +85,8 @@ export default function Navbar() {
             />
           </div>
           <div className="flex flex-col mt-0.5 text-left">
-            <span className={`${cinzel.className} text-lg md:text-2xl font-bold tracking-[0.1em] text-foreground leading-none uppercase`}>RUHQALAM</span>
-            <span className="text-[7px] md:text-[9px] tracking-[0.4em] md:tracking-[0.5em] text-gold font-extrabold uppercase mt-1.5 leading-none">SPIRIT OF THE PEN</span>
+            <span className={`${cinzel.className} text-sm md:text-2xl font-bold tracking-[0.1em] text-foreground leading-none uppercase`}>RUHQALAM</span>
+            <span className="hidden md:block text-[9px] tracking-[0.5em] text-gold font-extrabold uppercase mt-1.5 leading-none">SPIRIT OF THE PEN</span>
           </div>
         </Link>
 
@@ -147,7 +147,7 @@ export default function Navbar() {
           </Link>
 
           <button 
-            className="md:hidden p-2.5 text-foreground hover:bg-secondary rounded-full transition-all"
+            className="md:hidden p-2 text-foreground hover:bg-secondary rounded-full transition-all"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <X className="w-5 h-5" strokeWidth={2} /> : <Menu className="w-5 h-5" strokeWidth={2} />}

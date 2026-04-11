@@ -133,14 +133,14 @@ export default function ProductCard({ product }: { product: Product }) {
       </div>
 
       {/* Info Section */}
-      <div className="p-5 py-6 space-y-3" suppressHydrationWarning>
+      <div className="p-3 md:p-5 py-4 md:py-6 space-y-2 md:space-y-3" suppressHydrationWarning>
         <div className="flex items-center justify-between">
-            <span className="text-[9px] font-black tracking-[0.5em] text-gold uppercase">Authentic Script</span>
+            <span className="text-[7px] md:text-[9px] font-black tracking-[0.3em] md:tracking-[0.5em] text-gold uppercase">Authentic Script</span>
             {isOutOfStock ? (
-              <span className="text-[10px] font-black text-red-500 uppercase flex items-center gap-1.5"><X className="w-3.5 h-3.5" /> ARCHIVED</span>
+              <span className="text-[8px] md:text-[10px] font-black text-red-500 uppercase flex items-center gap-1.5"><X className="w-3 md:w-3.5 h-3 md:h-3.5" /> ARCHIVED</span>
             ) : product.stock > 0 && product.stock < 5 ? (
-              <span className="text-[10px] font-black text-red-600 animate-pulse uppercase tracking-widest flex items-center gap-1.5 bg-red-500/10 px-3 py-1 rounded-full border border-red-500/10">
-                LIMITED EDITION
+              <span className="text-[8px] md:text-[10px] font-black text-red-600 animate-pulse uppercase tracking-tight md:tracking-widest flex items-center gap-1 bg-red-500/10 px-2 md:px-3 py-1 rounded-full border border-red-500/10">
+                LIMITED
               </span>
             ) : (
               <div className="flex items-center gap-2">
@@ -168,14 +168,14 @@ export default function ProductCard({ product }: { product: Product }) {
               </div>
             )}
         </div>
-        <h3 className={`${cinzel.className} text-2xl font-bold text-foreground tracking-tight line-clamp-1`}>
+        <h3 className={`${cinzel.className} text-base md:text-2xl font-bold text-foreground tracking-tight line-clamp-1`}>
           {product.title}
         </h3>
         <div className="flex items-center justify-between" suppressHydrationWarning>
-          <p className="text-2xl font-black text-foreground/30 font-serif italic">
+          <p className="text-lg md:text-2xl font-black text-foreground/40 font-serif italic">
             Rs. {product.price.toLocaleString()}
           </p>
-          <div className="w-12 h-[1px] bg-gold/30" suppressHydrationWarning />
+          <div className="w-8 md:w-12 h-[1px] bg-gold/30" suppressHydrationWarning />
         </div>
       </div>
 

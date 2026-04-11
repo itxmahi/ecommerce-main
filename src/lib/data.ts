@@ -82,12 +82,13 @@ export async function getHeroSlides(): Promise<HeroSlide[]> {
   return unstable_cache(
     async () => {
       try {
-        return await prisma.heroSlide.findMany({
+        const slides = await prisma.heroSlide.findMany({
           orderBy: { displayOrder: 'asc' },
-        }) as HeroSlide[];
+        });
+        return slides as unknown as HeroSlide[];
       } catch (error) {
         console.error('Error fetching hero slides:', error);
-        return [{ id: 'default', url: '/images/box-1.jpeg', type: 'IMAGE' }];
+        return [{ id: 'default', url: '/images/box-1.jpeg', type: 'IMAGE' }] as HeroSlide[];
       }
     },
     ['hero-slides'],

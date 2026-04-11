@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Cinzel } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
-import { Navbar, Footer } from "@/components";
+import { Navbar, Footer, BottomNav } from "@/components";
 import Image from "next/image";
 import Script from "next/script";
 
@@ -149,9 +149,10 @@ export default function RootLayout({
 
         <CartProvider>
           <Navbar />
-          <main className="flex-grow pt-24 pb-12">
+          <main className="flex-grow pt-24 pb-32 md:pb-12">
             {children}
           </main>
+          <BottomNav />
           <Footer />
 
           {/* Floating WhatsApp Action */}
