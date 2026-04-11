@@ -107,3 +107,36 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+/* Swiper Pagination Professional Styled */
+.swiper-pagination-bullet.apple-bullet {
+  width: 40px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  opacity: 1;
+  transition: all 0.7s ease;
+  margin: 0 4px !important;
+  border-radius: 0;
+}
+
+.swiper-pagination-bullet-active.apple-bullet-active {
+  width: 80px;
+  background: #d4af37;
+  box-shadow: 0 0 20px rgba(212,175,55,0.4);
+}
+
+.swiper-pagination {
+  bottom: 60px !important;
+  left: 10%;
+  text-align: left !important;
+  display: flex !important;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .swiper-pagination {
+    left: 0 !important;
+    justify-content: center !important;
+    bottom: 40px !important;
+  }
+}

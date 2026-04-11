@@ -178,37 +178,7 @@ export default function HeroSection({
           </SwiperSlide>
         ))}
 
-        {/* Professional Minimalist Pagination */}
-        <style jsx global>{`
-          .swiper-pagination-bullet.apple-bullet {
-            width: 40px;
-            height: 2px;
-            background: rgba(255, 255, 255, 0.2);
-            opacity: 1;
-            transition: all 0.7s ease;
-            margin: 0 4px !important;
-            border-radius: 0;
-          }
-          .swiper-pagination-bullet-active.apple-bullet-active {
-            width: 80px;
-            background: #d4af37;
-            box-shadow: 0 0 20px rgba(212,175,55,0.4);
-          }
-          .swiper-pagination {
-            bottom: 60px !important;
-            left: 100px !important;
-            text-align: left !important;
-            display: flex;
-            align-items: center;
-          }
-          @media (max-width: 768px) {
-            .swiper-pagination {
-              left: 0 !important;
-              justify-content: center;
-              bottom: 40px !important;
-            }
-          }
-        `}</style>
+        {/* Professional Minimalist Pagination handled in globals.css */}
       </Swiper>
       
       {/* Decorative Elements */}

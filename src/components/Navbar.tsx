@@ -21,9 +21,11 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [mounted, setMounted] = useState(false);
 
   // Sync theme with system/localStorage
   useEffect(() => {
+    setMounted(true);
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
     if (savedTheme) {
       setTheme(savedTheme);
@@ -218,14 +220,14 @@ export default function Navbar() {
               )}
            </div>
 
-           <div className="mt-auto pt-10 border-t border-border space-y-4">
+            <div className="mt-auto pt-10 border-t border-border space-y-4" suppressHydrationWarning>
               <p className="text-[10px] font-black text-muted tracking-widest uppercase">Location</p>
               <p className="text-sm font-bold text-foreground">Islamabad, Pakistan</p>
-              <div className="flex gap-4 pt-4">
+              <div className="flex gap-4 pt-4" suppressHydrationWarning>
                  {/* Placeholder for social luxury icons */}
-                 <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-[10px] font-black">FB</div>
-                 <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-[10px] font-black">IG</div>
-                 <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-[10px] font-black">WA</div>
+                 <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-[10px] font-black" suppressHydrationWarning>FB</div>
+                 <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-[10px] font-black" suppressHydrationWarning>IG</div>
+                 <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-[10px] font-black" suppressHydrationWarning>WA</div>
               </div>
            </div>
          </div>

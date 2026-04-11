@@ -3,10 +3,17 @@
 import Image from "next/image";
 import { Cinzel } from "next/font/google";
 import { Camera, Mail, Phone, Video, MapPin } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const cinzel = Cinzel({ subsets: ["latin"] });
 
 export default function Footer() {
+  const [year, setYear] = useState<number>(2026);
+
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
+
   return (
     <footer className="bg-[#0a0a0a] text-white pt-24 pb-12 border-none">
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-16 md:gap-8">
@@ -30,10 +37,11 @@ export default function Footer() {
               target="_blank" 
               rel="noopener noreferrer" 
               className="group relative w-12 h-12 flex items-center justify-center rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 hover:border-indigo-500/50 hover:bg-indigo-600/10 transition-all duration-500 hover:-translate-y-2 active:scale-95 shadow-[0_15px_35px_rgba(0,0,0,0.2)] overflow-hidden"
+              suppressHydrationWarning
             >
-              <div className="absolute inset-0 bg-indigo-600 opacity-0 group-hover:opacity-10 transition-opacity" />
+              <div className="absolute inset-0 bg-indigo-600 opacity-0 group-hover:opacity-10 transition-opacity" suppressHydrationWarning />
               <Camera className="w-5 h-5 text-gray-300 group-hover:text-white group-hover:scale-125 group-hover:rotate-6 transition-all duration-500" strokeWidth={1.5} />
-              <div className="absolute -inset-1 bg-indigo-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute -inset-1 bg-indigo-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" suppressHydrationWarning />
             </a>
             
             <a 
@@ -95,8 +103,8 @@ export default function Footer() {
 
       {/* Bottom Bar */}
       <div className="max-w-7xl mx-auto px-6 mt-24 pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
-        <p className="text-[10px] font-black tracking-[0.3em] uppercase text-gray-500">
-          © {new Date().getFullYear()} RUHQALAM COLLECTION. ALL RIGHTS RESERVED.
+        <p className="text-[10px] font-black tracking-[0.3em] uppercase text-gray-500" suppressHydrationWarning>
+          © {year} RUHQALAM COLLECTION. ALL RIGHTS RESERVED.
         </p>
         <div className="flex items-center gap-8">
           <span className="text-[10px] font-black tracking-[0.3em] uppercase text-gray-500 hover:text-white cursor-pointer transition-colors">Privacy Policy</span>

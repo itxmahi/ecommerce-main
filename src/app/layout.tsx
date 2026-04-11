@@ -161,14 +161,15 @@ export default function RootLayout({
             rel="noopener noreferrer"
             className="fixed bottom-8 right-8 z-[100] group"
             aria-label="Contact on WhatsApp"
+            suppressHydrationWarning
           >
-            <div className="relative">
+            <div className="relative" suppressHydrationWarning>
               {/* Pulsating Rings */}
-              <div className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-25 group-hover:opacity-40 transition-opacity"></div>
-              <div className="absolute inset-0 rounded-full bg-green-500 animate-pulse opacity-40"></div>
+              <div className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-25 group-hover:opacity-40 transition-opacity" suppressHydrationWarning></div>
+              <div className="absolute inset-0 rounded-full bg-green-500 animate-pulse opacity-40" suppressHydrationWarning></div>
               
               {/* Main Button */}
-              <div className="relative flex items-center justify-center w-16 h-16 bg-[#25D366] text-white rounded-full shadow-[0_20px_50px_rgba(37,211,102,0.4)] hover:shadow-[0_25px_60px_rgba(37,211,102,0.6)] transform hover:-translate-y-2 transition-all duration-500">
+              <div className="relative flex items-center justify-center w-16 h-16 bg-[#25D366] text-white rounded-full shadow-[0_20px_50px_rgba(37,211,102,0.4)] hover:shadow-[0_25px_60px_rgba(37,211,102,0.6)] transform hover:-translate-y-2 transition-all duration-500" suppressHydrationWarning>
                 <svg 
                   viewBox="0 0 24 24" 
                   className="w-8 h-8 fill-current"
@@ -179,9 +180,9 @@ export default function RootLayout({
               </div>
 
               {/* Tooltip */}
-              <div className="absolute right-20 top-1/2 -translate-y-1/2 bg-white text-black px-6 py-2.5 rounded-2xl text-[10px] font-black tracking-[0.2em] uppercase whitespace-nowrap shadow-2xl opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 pointer-events-none border border-black/5">
+              <div className="absolute right-20 top-1/2 -translate-y-1/2 bg-white text-black px-6 py-2.5 rounded-2xl text-[10px] font-black tracking-[0.2em] uppercase whitespace-nowrap shadow-2xl opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 pointer-events-none border border-black/5" suppressHydrationWarning>
                 INQUIRE ON WHATSAPP
-                <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white rotate-45 border-r border-t border-black/5"></div>
+                <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white rotate-45 border-r border-t border-black/5" suppressHydrationWarning></div>
               </div>
             </div>
           </a>
