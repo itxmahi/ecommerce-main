@@ -780,20 +780,29 @@ export default function AdminPage() {
                            <div className="flex items-center gap-4 text-indigo-500"><span className="w-12 h-[1px] bg-indigo-500" /> <span className="text-[10px] font-black tracking-[0.5em] uppercase">TIMING ENGINE</span></div>
                            <h4 className="text-3xl font-black text-gray-900 dark:text-white">Slider Duration</h4>
                            <p className="text-lg text-gray-500 font-medium leading-relaxed max-w-md">Choose the speed at which your gallery transitions between masterpieces.</p>
-                           <div className="flex flex-wrap gap-2 md:gap-4 p-2 bg-gray-200 dark:bg-white/5 rounded-3xl w-fit">
-                              {[5000, 10000].map((t) => (
-                                <button 
-                                  key={t}
-                                  onClick={() => handleDelayUpdate(t)}
-                                  className={`px-10 py-4 rounded-2xl text-[10px] font-black tracking-[0.2em] transition-all ${
-                                    heroDelay === t 
-                                    ? 'bg-indigo-600 text-white shadow-lg scale-105' 
-                                    : 'text-gray-400 hover:text-indigo-600'
-                                  }`}
-                                >
-                                  {t / 1000} SECONDS
-                                </button>
-                              ))}
+                           <div className="space-y-6 pt-4">
+                             <div className="flex justify-between items-end">
+                                <span className={cn(cinzel.className, "text-5xl font-black text-indigo-600 italic")}>{heroDelay / 1000}s</span>
+                                <span className="text-[10px] font-black text-gray-400 tracking-[0.3em] uppercase">PRECISION CALIBRATION</span>
+                             </div>
+                             <input 
+                               type="range" 
+                               min="1000" 
+                               max="10000" 
+                               step="500" 
+                               value={heroDelay} 
+                               onChange={(e) => setHeroDelay(parseInt(e.target.value))}
+                               onMouseUp={(e) => handleDelayUpdate(parseInt((e.target as HTMLInputElement).value))}
+                               onTouchEnd={(e) => handleDelayUpdate(parseInt((e.target as HTMLInputElement).value))}
+                               className="w-full h-2 bg-gray-200 dark:bg-white/10 rounded-full appearance-none accent-indigo-600 cursor-pointer" 
+                             />
+                             <div className="flex justify-between text-[8px] font-black text-gray-500 uppercase tracking-widest px-2">
+                                <span>1s</span>
+                                <span>2.5s</span>
+                                <span>5s</span>
+                                <span>7.5s</span>
+                                <span>10s</span>
+                             </div>
                            </div>
                         </div>
 

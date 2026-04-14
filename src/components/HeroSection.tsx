@@ -1,19 +1,19 @@
 'use client';
 
-import { ShoppingBag, ChevronRight } from 'lucide-react';
+import { ShoppingBag, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { Cinzel, Inter } from 'next/font/google';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, EffectFade, Parallax, Pagination } from 'swiper/modules';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { Autoplay, EffectFade, Parallax, Pagination, Navigation } from 'swiper/modules';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-
 
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/effect-fade';
 import 'swiper/css/pagination';
+import 'swiper/css/navigation';
 
 const cinzel = Cinzel({ subsets: ["latin"] });
 const inter = Inter({ subsets: ["latin"], weight: ['400', '700', '900'] });
@@ -40,10 +40,6 @@ export default function HeroSection({
   const [heroDelay, setHeroDelay] = useState(initialDelay);
   const [videoEnabled, setVideoEnabled] = useState(initialVideoEnabled);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const { scrollY } = useScroll();
-  const opacity = useTransform(scrollY, [0, 400], [1, 0]);
-  const scale = useTransform(scrollY, [0, 400], [1, 0.95]);
 
   useEffect(() => {
     // Only fetch if not provided via props
@@ -77,8 +73,8 @@ export default function HeroSection({
 
   if (isLoading) {
     return (
-      <div className="relative mx-auto max-w-[1400px] h-[500px] md:h-[750px] rounded-[3.5rem] bg-zinc-950 flex items-center justify-center animate-pulse mt-8">
-        <div className="w-12 h-12 border-4 border-white/10 border-t-white rounded-full animate-spin" />
+      <div className="relative mx-auto max-w-7xl aspect-square md:h-[80vh] rounded-[2.5rem] bg-secondary/10 flex items-center justify-center animate-pulse mt-8">
+        <div className="w-12 h-12 border-2 border-gold/20 border-t-gold rounded-full animate-spin" />
       </div>
     );
   }
@@ -86,104 +82,107 @@ export default function HeroSection({
   return (
     <motion.section 
       ref={containerRef}
-      style={{ opacity }}
-      className="relative w-full h-[600px] md:h-[90vh] overflow-hidden group bg-zinc-950"
+      className="relative w-full max-w-7xl mx-auto px-4 md:px-0 mt-6 md:mt-8"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 1.2, ease: "circOut" }}
     >
-      <Swiper
-        key={`${heroDelay}-${videoEnabled}`}
-        modules={[Autoplay, EffectFade, Parallax, Pagination]}
-        effect="fade"
-        parallax={true}
-        pagination={{
-            clickable: true,
-            bulletClass: 'swiper-pagination-bullet apple-bullet',
-            bulletActiveClass: 'swiper-pagination-bullet-active apple-bullet-active',
-        }}
-        autoplay={{ delay: heroDelay, disableOnInteraction: false }}
-        loop={visibleSlides.length > 1}
-        className="w-full h-full"
-      >
-        {visibleSlides.map((slide) => (
-          <SwiperSlide key={slide.id}>
-              {/* Subtle gradients removed/reduced to show BG image clearly as requested */}
-              {/* Subtle radial gradient to keep center image clear while ensuring button readability */}
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.2)_100%)] z-20" />
-              <div className="absolute inset-0 bg-black/5 z-20" />
-              
-              {slide.type === 'VIDEO' ? (
-                <video 
-                  src={slide.url} 
-                  autoPlay muted loop playsInline 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full relative" data-swiper-parallax="20%">
-                  <Image 
+      {/* Luxury Ad Card Container */}
+      <div className="relative aspect-square md:aspect-[21/9] md:h-[75vh] rounded-[3rem] overflow-hidden shadow-[0_32px_80px_-20px_rgba(0,0,0,0.3)] border border-border/50 bg-white dark:bg-black group">
+        
+        <Swiper
+          key={`${heroDelay}-${videoEnabled}-${visibleSlides.length}`}
+          modules={[Autoplay, EffectFade, Parallax, Pagination, Navigation]}
+          effect="fade"
+          parallax={true}
+          navigation={{
+            prevEl: '.hero-prev',
+            nextEl: '.hero-next',
+          }}
+          pagination={{
+              clickable: true,
+              bulletClass: 'swiper-pagination-bullet apple-bullet',
+              bulletActiveClass: 'swiper-pagination-bullet-active apple-bullet-active',
+          }}
+          autoplay={{ delay: heroDelay, disableOnInteraction: false }}
+          loop={visibleSlides.length > 1}
+          className="w-full h-full"
+        >
+          {visibleSlides.map((slide, index) => (
+            <SwiperSlide key={slide.id}>
+                {/* High-Clear Image Rendering */}
+                {slide.type === 'VIDEO' ? (
+                  <video 
                     src={slide.url} 
-                    alt="Premium Artwork" 
-                    fill
-                    priority={visibleSlides.indexOf(slide) === 0}
-                    className="object-cover scale-100 transition-transform duration-[4s]"
+                    autoPlay muted loop playsInline 
+                    className="w-full h-full object-cover"
                   />
-                </div>
-              )}
-            
-            {/* Content Overlay - Professional Ad Style */}
-            <div className="absolute inset-0 z-30 flex items-center px-10 md:px-24">
-              <motion.div 
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 1, ease: "easeOut" }}
-                className="max-w-xl flex flex-col items-start gap-8"
-              >
-                <div className="space-y-4">
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="flex items-center gap-4"
-                  >
-                    <span className="h-[1px] w-12 bg-gold/50" />
-                    <span className={`${inter.className} text-gold text-[10px] uppercase font-black tracking-[0.6em]`}>
-                      Premier Experience
+                ) : (
+                  <div className="w-full h-full relative overflow-hidden">
+                    <Image 
+                      src={slide.url} 
+                      alt={`RUHQALAM Masterpiece ${index + 1}`} 
+                      fill
+                      priority={index === 0}
+                      className="object-cover scale-100 group-hover:scale-105 transition-transform duration-[6s] ease-out-expo"
+                      sizes="(max-width: 1200px) 100vw, 90vw"
+                      quality={100}
+                    />
+                    {/* Soft Vignette for focus */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 z-10" />
+                  </div>
+                )}
+              
+              {/* Refined Premium Overlay */}
+              <div className="absolute inset-0 z-20 flex flex-col justify-end p-8 md:p-16">
+                <motion.div 
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 1, delay: 0.3 }}
+                  className="max-w-2xl space-y-6"
+                >
+                  <div className="hidden md:block space-y-4">
+                    <span className="inline-block px-4 py-1.5 rounded-full border border-white/20 glass text-[10px] font-black tracking-[0.4em] uppercase text-white shadow-xl">
+                      Exclusive Collection
                     </span>
-                  </motion.div>
+                    <h2 className={`${cinzel.className} text-white text-4xl md:text-7xl font-light leading-[1.1] tracking-tighter drop-shadow-2xl`}>
+                      Where Spirit <br/> Meets <span className="font-black italic text-gold">Mastery</span>
+                    </h2>
+                  </div>
 
-                  <h2 className={`${cinzel.className} text-white text-5xl md:text-7xl font-light leading-tight tracking-tight`}>
-                    Defining The <br />
-                    <span className="font-black italic">Next Level</span>
-                  </h2>
-                  
-                  <p className={`${inter.className} text-white/50 text-xs md:text-sm max-w-md leading-relaxed tracking-wider font-medium`}>
-                    Explore a collection where master craftsmanship meets modern luxury. Every piece is a statement of perfection.
-                  </p>
-                </div>
+                  <div className="flex items-center gap-4">
+                    <Link href="#products">
+                      <button className={`${cinzel.className} relative overflow-hidden px-10 md:px-14 py-4 md:py-5 rounded-full bg-white/10 backdrop-blur-xl border border-gold/40 text-white text-[10px] md:text-[11px] font-black tracking-[0.4em] uppercase transition-all duration-700 hover:bg-gold hover:text-white flex items-center gap-3 md:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)]`}>
+                        Shop Now <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </Link>
+                    <div className="hidden sm:flex items-center gap-2 text-white/60">
+                       <span className="w-8 h-[1px] bg-white/20" />
+                       <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">Explore The Gallery</span>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
 
-                <Link href="#products" className="pointer-events-auto">
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="relative group cursor-pointer"
-                  >
-                    <div className="absolute -inset-1 bg-gold/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                    
-                    <button className={`${cinzel.className} relative px-10 py-5 rounded-full bg-white text-black text-[11px] font-black tracking-[0.4em] uppercase transition-all duration-700 group-hover:bg-gold group-hover:text-white flex items-center gap-4 shadow-[0_20px_40px_rgba(0,0,0,0.3)]`}>
-                      <span className="relative z-10">Shop Experience</span>
-                      <ChevronRight className="w-4 h-4 relative z-10 transition-transform duration-700 group-hover:translate-x-1" />
-                    </button>
-                  </motion.div>
-                </Link>
-              </motion.div>
-            </div>
-          </SwiperSlide>
-        ))}
-
-        {/* Professional Minimalist Pagination handled in globals.css */}
-      </Swiper>
+        {/* Minimal Navigation Buttons */}
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-50 px-6 flex justify-between pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+           <button className="hero-prev w-12 h-12 rounded-full glass border border-white/10 flex items-center justify-center text-white pointer-events-auto hover:bg-white hover:text-black transition-all">
+              <ChevronLeft className="w-6 h-6" />
+           </button>
+           <button className="hero-next w-12 h-12 rounded-full glass border border-white/10 flex items-center justify-center text-white pointer-events-auto hover:bg-white hover:text-black transition-all">
+              <ChevronRight className="w-6 h-6" />
+           </button>
+        </div>
+      </div>
       
-      {/* Decorative Elements */}
-      <div className="absolute inset-0 border border-white/5 pointer-events-none z-50" />
-      <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-black/60 to-transparent pointer-events-none z-20" />
+      {/* Scroll Indicator */}
+      <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-2 opacity-40">
+         <span className="w-[1px] h-8 bg-gradient-to-b from-gold to-transparent" />
+         <span className="text-[8px] font-black uppercase tracking-[0.5em] text-gold">Scroll</span>
+      </div>
     </motion.section>
   );
 }

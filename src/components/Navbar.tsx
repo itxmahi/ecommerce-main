@@ -3,27 +3,19 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Cinzel } from 'next/font/google';
+import { useCart } from '@/context/CartContext';
+import { ShoppingCart, Heart, Search, Sun, Moon } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 const cinzel = Cinzel({ subsets: ["latin"] });
-import { useCart } from '@/context/CartContext';
-import { ShoppingCart, Heart, Search, User, Menu, X, Sun, Moon } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
 
 export default function Navbar() {
   const { cart, wishlist } = useCart();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [mounted, setMounted] = useState(false);
 
-  // Sync theme with system/localStorage
   useEffect(() => {
     setMounted(true);
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
@@ -43,15 +35,6 @@ export default function Navbar() {
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
   };
 
-  // Prevent scroll when menu is open
-  useEffect(() => {
-    if (isMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-  }, [isMenuOpen]);
-
   useEffect(() => {
     if (typeof window !== 'undefined' && localStorage.getItem('adminAuth') === 'true') {
       setIsAdmin(true);
@@ -65,23 +48,24 @@ export default function Navbar() {
 
   const cartCount = cart.reduce((count, item) => count + item.quantity, 0);
 
+  if (!mounted) return null;
+
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 ${
-      isScrolled 
-        ? 'bg-white/90 dark:bg-black/80 backdrop-blur-2xl py-3 shadow-[0_8px_40px_rgba(0,0,0,0.08)]' 
-        : 'bg-transparent py-6 md:py-8'
-    }`}>
+    <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 ${isScrolled
+      ? 'bg-white/90 dark:bg-black/80 backdrop-blur-2xl py-3 shadow-[0_8px_40px_rgba(0,0,0,0.08)]'
+      : 'bg-transparent py-6 md:py-8'
+      }`}>
       <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-        
+
         {/* Luxury Logo */}
         <Link href="/" className="flex items-center gap-3 md:gap-5 group">
           <div className="relative w-10 h-10 md:w-16 md:h-16 rounded-full overflow-hidden ring-1 ring-indigo-500/20 group-hover:ring-indigo-500 transition-all duration-700 shadow-2xl">
-            <Image 
-              src="/logo.png" 
-              alt="RUHQALAM Logo" 
-              fill 
+            <Image
+              src="/logo.png"
+              alt="RUHQALAM Logo"
+              fill
               priority
-              className="object-cover group-hover:scale-110 transition-transform duration-1000" 
+              className="object-cover group-hover:scale-110 transition-transform duration-1000"
             />
           </div>
           <div className="flex flex-col mt-0.5 text-left">
@@ -111,126 +95,38 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Minimal Icons */}
+        {/* Minimal Icons - Simplified for Mobile */}
         <div className="flex items-center gap-1.5 md:gap-3">
-          <button 
+          <button
             onClick={toggleTheme}
             className="p-2.5 text-muted hover:text-gold transition-all duration-300 hover:bg-gold/10 rounded-full"
             title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
           >
-            {theme === 'light' ? <Moon className="w-4.5 h-4.5" strokeWidth={2} /> : <Sun className="w-4.5 h-4.5" strokeWidth={2} />}
+            {theme === 'light' ? <Moon className="w-4.5 h-4.5" /> : <Sun className="w-4.5 h-4.5" />}
           </button>
 
-          <Link 
+          {/* Search Icon visible on tablets and up in the top bar */}
+          <Link
             href="/#products"
             className="relative p-2.5 text-muted hover:text-gold transition-all duration-300 hover:bg-gold/10 rounded-full hidden sm:block"
           >
-            <Search className="w-4.5 h-4.5" strokeWidth={2} />
-          </Link>
-          
-          <Link href="/wishlist" className="relative p-2.5 text-muted hover:text-gold transition-all duration-300 hover:bg-gold/10 rounded-full">
-            <Heart className={`w-4.5 h-4.5 transition-all ${wishlist.length > 0 ? 'fill-red-500 text-red-500' : ''}`} strokeWidth={2} />
-            {wishlist.length > 0 && (
-              <span className="absolute top-1 right-1 bg-red-500 text-white text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center font-bold">
-                {wishlist.length}
-              </span>
-            )}
+            <Search className="w-4.5 h-4.5" />
           </Link>
 
-          <Link href="/cart" className="relative p-2.5 text-muted hover:text-gold transition-all duration-300 hover:bg-gold/10 rounded-full">
-            <ShoppingCart className="w-4.5 h-4.5" strokeWidth={2} />
+          {/* Wishlist & Cart icons hidden on mobile top-bar as they are in BottomNav */}
+          <Link href="/wishlist" className="relative p-2.5 text-muted hover:text-gold transition-all duration-300 hover:bg-gold/10 rounded-full hidden md:flex">
+            <Heart className={`w-4.5 h-4.5 ${wishlist.length > 0 ? 'fill-red-500 text-red-500' : ''}`} />
+          </Link>
+
+          <Link href="/cart" className="relative p-2.5 text-muted hover:text-gold transition-all duration-300 hover:bg-gold/10 rounded-full hidden md:flex">
+            <ShoppingCart className="w-4.5 h-4.5" />
             {cartCount > 0 && (
               <span className="absolute top-1 right-1 bg-gold text-white text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center font-bold">
                 {cartCount}
               </span>
             )}
           </Link>
-
-          <button 
-            className="md:hidden p-2 text-foreground hover:bg-secondary rounded-full transition-all"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X className="w-5 h-5" strokeWidth={2} /> : <Menu className="w-5 h-5" strokeWidth={2} />}
-          </button>
         </div>
-      </div>
-
-      {/* Luxury Mobile Menu Drawer */}
-      <div className={cn(
-        "fixed inset-0 z-[110] transition-all duration-700 md:hidden",
-        isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-      )}>
-         {/* Backdrop */}
-         <div 
-           className="absolute inset-0 bg-black/40 backdrop-blur-md"
-           onClick={() => setIsMenuOpen(false)}
-         />
-         
-         {/* Drawer Content */}
-         <div className={cn(
-           "absolute top-0 right-0 h-screen w-[85%] max-w-sm bg-white dark:bg-[#0a0a0a] shadow-[-20px_0_80px_rgba(0,0,0,0.5)] transition-transform duration-700 ease-checkout flex flex-col p-10 py-16",
-           isMenuOpen ? "translate-x-0" : "translate-x-full"
-         )}>
-           <button 
-             onClick={() => setIsMenuOpen(false)}
-             className="absolute top-8 right-8 p-3 hover:bg-secondary rounded-full transition-all active:scale-90"
-           >
-             <X className="w-6 h-6" strokeWidth={1} />
-           </button>
-
-            <div className="flex items-center gap-4 mb-20">
-              <div className="w-12 h-12 rounded-full overflow-hidden ring-1 ring-gold/40">
-                                <Image src="/logo.png" alt="Logo" width={64} height={64} className="object-cover" />
-              </div>
-              <div>
-                <p className={`${cinzel.className} text-2xl font-bold tracking-widest text-foreground uppercase`}>RUHQALAM</p>
-                <p className="text-[9px] font-bold text-gold tracking-[0.4em] uppercase">SPIRIT OF THE PEN</p>
-              </div>
-            </div>
-
-           <div className="flex flex-col space-y-10 group/menu">
-              {[
-                { label: 'HOME', href: '/' },
-                { label: 'WISHLIST', href: '/wishlist', count: wishlist.length },
-                { label: 'CART', href: '/cart', count: cartCount },
-                { label: 'ISLAMIC ART', href: '/#products' },
-                { label: 'CUSTOM ORDER', href: '/#custom-order' }
-              ].map((item) => (
-                <Link 
-                  key={item.label}
-                  href={item.href} 
-                  onClick={() => setIsMenuOpen(false)} 
-                  className="flex items-center justify-between text-3xl font-black tracking-tighter text-foreground hover:text-gold transition-all duration-300 hover:translate-x-2"
-                >
-                  {item.label}
-                  {item.count !== undefined && item.count > 0 && (
-                    <span className="text-sm font-black bg-gold text-white w-6 h-6 rounded-full flex items-center justify-center -translate-y-2">{item.count}</span>
-                  )}
-                </Link>
-              ))}
-              
-              {isAdmin && (
-                <Link 
-                  href="/admin-secret" 
-                  onClick={() => setIsMenuOpen(false)} 
-                  className="text-2xl font-black tracking-tighter text-gold border-t border-gold/10 pt-10"
-                >
-                  STORE DASHBOARD
-                </Link>
-              )}
-           </div>
-
-            <div className="mt-auto pt-10 border-t border-border space-y-4" suppressHydrationWarning>
-              <p className="text-[10px] font-black text-muted tracking-widest uppercase">Location</p>
-              <p className="text-sm font-bold text-foreground">Islamabad, Pakistan</p>
-              <div className="flex gap-4 pt-4" suppressHydrationWarning>
-                 {/* Placeholder for social luxury icons */}
-                 <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-[10px] font-black" suppressHydrationWarning>FB</div>
-                 <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-[10px] font-black" suppressHydrationWarning>IG</div>
-                 <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-[10px] font-black" suppressHydrationWarning>WA</div>
-              </div>
-           </div>
-         </div>
       </div>
     </nav>
   );

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getProducts, addProduct } from '@/lib/data';
+import { prisma } from '@/lib/prisma';
+import { getProducts } from '@/lib/data';
 
 export async function GET() {
   const products = await getProducts();
@@ -9,7 +10,9 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const newProduct = await addProduct(body);
+    const newProduct = await prisma.product.create({
+      data: body,
+    });
     return NextResponse.json(newProduct, { status: 201 });
   } catch (error: any) {
     console.error('[API Error] Product Creation Failed:', error);

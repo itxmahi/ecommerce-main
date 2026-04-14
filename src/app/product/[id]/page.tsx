@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 import { Heart, ShoppingBag, Truck, ShieldCheck, RefreshCcw } from 'lucide-react';
 
 // Enhanced Dynamic Metadata for SEO
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+export async function generateMetadata({ params }: any): Promise<Metadata> {
   const resolvedParams = await params;
   const product = await getProductById(resolvedParams.id);
   
@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ProductDetailPage({ params }: any) {
   const resolvedParams = await params;
   const product = await getProductById(resolvedParams.id);
 
